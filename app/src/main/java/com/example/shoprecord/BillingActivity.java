@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,13 +19,7 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shashank.sony.fancytoastlib.FancyToast;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.Objects;
 
 public class BillingActivity extends AppCompatActivity {
 
@@ -37,12 +30,15 @@ public class BillingActivity extends AppCompatActivity {
     private TextView txtEmptyBill;
     private ListView bill_recipient_listview;
     private BillsListAdapter billsListAdapter;
-
+    private LayoutInflater layoutInflater;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_billing);
         setTitle("BILLING");
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
 
         //initialize ui components
         fbtn_add_bill = findViewById(R.id.fbtn_add_bill);
@@ -52,6 +48,7 @@ public class BillingActivity extends AppCompatActivity {
 
         isShowingPopup = false;
         billsListAdapter = new BillsListAdapter(BillingActivity.this);
+        layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 
         bill_recipient_listview.setAdapter(billsListAdapter);
 
@@ -71,13 +68,13 @@ public class BillingActivity extends AppCompatActivity {
 
                     isShowingPopup = true;
 
-                    LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+
                     View popup_view = layoutInflater.inflate(R.layout.recipient_info_popup, null);
 
                     //ui components
                     EditText edtRecipientName = popup_view.findViewById(R.id.edtRecipientName);
-                    TextView txtInsertRecipient = popup_view.findViewById(R.id.txtInsertRecipient);
-                    TextView txtCancelRecipient = popup_view.findViewById(R.id.txtCancelRecipient);
+                    TextView txtInsertRecipient = popup_view.findViewById(R.id.txtInsertSingleBill);
+                    TextView txtCancelRecipient = popup_view.findViewById(R.id.txtCancelSingleBill);
 
                     //popup window
                     PopupWindow popupWindow = new PopupWindow(popup_view, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -182,6 +179,55 @@ public class BillingActivity extends AppCompatActivity {
         });
 
 
+        bill_recipient_listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                View popupView = layoutInflater.inflate(R.layout.delete_item_popup,null);
+                TextView txtDeleteStatement = popupView.findViewById(R.id.txtDeleteStatement);
+                TextView txtDelete = popupView.findViewById(R.id.txtDeleteItem);
+                TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDelete);
+
+                String item = Data.bills_list.get(i).get("name");
+
+                txtDeleteStatement.setText("Are You Sure To Delete The Bill \""+item+"\"?");
+
+                PopupWindow popupWindow = new PopupWindow(popupView,LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+                popupWindow.setFocusable(true);
+                popupWindow.showAtLocation(linearLayoutBillParent,Gravity.CENTER,0,0);
+
+
+                txtDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        String key = Data.bills_list.get(i).get("key");
+                        Data.bill_info_map.remove(key);
+                        Data.bills_list.remove(i);
+                        billsListAdapter.notifyDataSetChanged();
+
+                        popupWindow.setFocusable(false);
+                        popupWindow.dismiss();
+                        FancyToast.makeText(BillingActivity.this,"Deleted",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
+                    }
+                });
+
+
+                txtCancelDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        popupWindow.setFocusable(false);
+                        popupWindow.dismiss();
+                        FancyToast.makeText(BillingActivity.this,"Canceled",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
+                    }
+                });
+
+                return true;
+            }
+        });
+
+
     }
 
 
@@ -198,6 +244,12 @@ public class BillingActivity extends AppCompatActivity {
 
         super.onResume();
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return super.onSupportNavigateUp();
     }
 }
 

@@ -1,11 +1,14 @@
 package com.example.shoprecord;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -18,6 +21,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class StoreActivity extends AppCompatActivity {
 
@@ -34,6 +38,9 @@ public class StoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
         setTitle("STORE");
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
 
         //initializing ui components
         empty_text = findViewById(R.id.empty_text);
@@ -70,8 +77,8 @@ public class StoreActivity extends AppCompatActivity {
                         popupWindow.showAtLocation(linearLayoutStoreParent, Gravity.CENTER, 0, 0);
 
                         //ui components of popup
-                        TextView txtInsert = popup_view.findViewById(R.id.txtInsertRecipient);
-                        TextView txtCancel = popup_view.findViewById(R.id.txtCancelRecipient);
+                        TextView txtInsert = popup_view.findViewById(R.id.txtInsertSingleBill);
+                        TextView txtCancel = popup_view.findViewById(R.id.txtCancelSingleBill);
                         EditText edtItemName = popup_view.findViewById(R.id.edtItemName);
                         EditText edtItemQuantity = popup_view.findViewById(R.id.edtItemQuantity);
                         EditText edtItemPrice = popup_view.findViewById(R.id.edtItemPrice);
@@ -249,9 +256,10 @@ public class StoreActivity extends AppCompatActivity {
                 EditText edtItemName = popup_view.findViewById(R.id.edtItemName);
                 EditText edtItemPrice = popup_view.findViewById(R.id.edtItemPrice);
                 EditText edtItemQuantity = popup_view.findViewById(R.id.edtItemQuantity);
-                TextView txtInsert = popup_view.findViewById(R.id.txtInsertRecipient);
-                TextView txtCancel = popup_view.findViewById(R.id.txtCancelRecipient);
-
+                TextView txtInsert = popup_view.findViewById(R.id.txtInsertSingleBill);
+                TextView txtCancel = popup_view.findViewById(R.id.txtCancelSingleBill);
+                TextView txtPopupStatement = popup_view.findViewById(R.id.txtPopupStatement);
+                txtPopupStatement.setText("UPDATE ITEM INFO");
                 txtInsert.setText("UPDATE");
 
                 edtItemName.setText(Data.items_list.get(i).get("name"));
@@ -321,5 +329,36 @@ public class StoreActivity extends AppCompatActivity {
         });
 
 
+
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.store_menu,menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (item.getItemId()==R.id.store_share){
+
+            FancyToast.makeText(StoreActivity.this,"Will Share The Store!",FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return super.onSupportNavigateUp();
+    }
+
 }
