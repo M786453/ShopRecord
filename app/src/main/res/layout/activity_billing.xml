@@ -7,13 +7,14 @@
     tools:context=".BillingActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayoutBillParent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/txtEmptyBill"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -22,13 +23,14 @@
             android:textStyle="bold" />
 
         <ListView
+            android:id="@+id/bills_listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
+        android:id="@+id/fbtn_add_bill"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"

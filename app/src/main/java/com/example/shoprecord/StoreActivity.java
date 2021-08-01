@@ -33,7 +33,7 @@ public class StoreActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
-        getSupportActionBar().hide();
+        setTitle("STORE");
 
         //initializing ui components
         empty_text = findViewById(R.id.empty_text);
@@ -70,8 +70,8 @@ public class StoreActivity extends AppCompatActivity {
                         popupWindow.showAtLocation(linearLayoutStoreParent, Gravity.CENTER, 0, 0);
 
                         //ui components of popup
-                        TextView txtInsert = popup_view.findViewById(R.id.txtInsert);
-                        TextView txtCancel = popup_view.findViewById(R.id.txtCancel);
+                        TextView txtInsert = popup_view.findViewById(R.id.txtInsertRecipient);
+                        TextView txtCancel = popup_view.findViewById(R.id.txtCancelRecipient);
                         EditText edtItemName = popup_view.findViewById(R.id.edtItemName);
                         EditText edtItemQuantity = popup_view.findViewById(R.id.edtItemQuantity);
                         EditText edtItemPrice = popup_view.findViewById(R.id.edtItemPrice);
@@ -178,76 +178,47 @@ public class StoreActivity extends AppCompatActivity {
                 if (!isPopupShowing) {
 
                     isPopupShowing = true;
-                    View popup_view = layoutInflater.inflate(R.layout.add_item_popup, null);
-                    PopupWindow popupWindow = new PopupWindow(popup_view, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    EditText edtItemName = popup_view.findViewById(R.id.edtItemName);
-                    EditText edtItemPrice = popup_view.findViewById(R.id.edtItemPrice);
-                    EditText edtItemQuantity = popup_view.findViewById(R.id.edtItemQuantity);
-                    TextView txtInsert = popup_view.findViewById(R.id.txtInsert);
-                    TextView txtCancel = popup_view.findViewById(R.id.txtCancel);
 
-                    txtInsert.setText("UPDATE");
+                    View popupView = layoutInflater.inflate(R.layout.delete_item_popup,null);
+                    TextView txtDeleteStatement = popupView.findViewById(R.id.txtDeleteStatement);
+                    TextView txtDelete = popupView.findViewById(R.id.txtDeleteItem);
+                    TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDelete);
 
-                    edtItemName.setText(Data.items_list.get(i).get("name"));
-                    edtItemPrice.setText(Data.items_list.get(i).get("price"));
-                    edtItemQuantity.setText(Data.items_list.get(i).get("quantity"));
+                    String item = Data.items_list.get(i).get("name");
 
+                    txtDeleteStatement.setText("Are You Sure To Delete The Item \""+item+"\"?");
+
+                    PopupWindow popupWindow = new PopupWindow(popupView,LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                     popupWindow.setFocusable(true);
-                    popupWindow.showAtLocation(linearLayoutStoreParent, Gravity.CENTER, 0, 0);
+                    popupWindow.showAtLocation(linearLayoutStoreParent,Gravity.CENTER,0,0);
 
 
-                    txtInsert.setOnClickListener(new View.OnClickListener() {
+                    txtDelete.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
 
-                            //input validation
-                            if (edtItemName.getText().toString().isEmpty()) {
-
-                                FancyToast.makeText(StoreActivity.this, "Please Enter Item Name", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
-                                return;
-
-                            } else if (edtItemQuantity.getText().toString().isEmpty()) {
-
-                                FancyToast.makeText(StoreActivity.this, "Please Enter Item Quantity", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
-                                return;
-
-                            } else if (edtItemPrice.getText().toString().isEmpty()) {
-
-                                FancyToast.makeText(StoreActivity.this, "Please Enter Item Price", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
-                                return;
-
+                            Data.items_list.remove(i);
+                            storeListAdapter.notifyDataSetChanged();
+                            if (Data.items_list.size()==0){
+                                store_listview.setVisibility(View.GONE);
+                                empty_text.setVisibility(View.VISIBLE);
                             }
 
-                            //Item Hashmap
-                            HashMap<String, String> item_info = Data.items_list.get(i);
-                            item_info.put("name", edtItemName.getText().toString());
-                            item_info.put("quantity", edtItemQuantity.getText().toString());
-                            item_info.put("price", edtItemPrice.getText().toString());
-
-
-
-                            Data.items_list.set(i,item_info);
-
-
-                            storeListAdapter.notifyDataSetChanged();
-
-                            FancyToast.makeText(StoreActivity.this, "Updated", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                             popupWindow.setFocusable(false);
                             popupWindow.dismiss();
-                            isPopupShowing = false;
+                            FancyToast.makeText(StoreActivity.this,"Deleted",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
                         }
                     });
 
 
-                    txtCancel.setOnClickListener(new View.OnClickListener() {
+                    txtCancelDelete.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
 
-                            FancyToast.makeText(StoreActivity.this, "Canceled", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                             popupWindow.setFocusable(false);
                             popupWindow.dismiss();
-                            isPopupShowing = false;
+                            FancyToast.makeText(StoreActivity.this,"Canceled",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
                         }
                     });
 
@@ -263,6 +234,88 @@ public class StoreActivity extends AppCompatActivity {
                 }
                 return true;
 
+
+            }
+        });
+
+
+        store_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+
+                View popup_view = layoutInflater.inflate(R.layout.add_item_popup, null);
+                PopupWindow popupWindow = new PopupWindow(popup_view, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                EditText edtItemName = popup_view.findViewById(R.id.edtItemName);
+                EditText edtItemPrice = popup_view.findViewById(R.id.edtItemPrice);
+                EditText edtItemQuantity = popup_view.findViewById(R.id.edtItemQuantity);
+                TextView txtInsert = popup_view.findViewById(R.id.txtInsertRecipient);
+                TextView txtCancel = popup_view.findViewById(R.id.txtCancelRecipient);
+
+                txtInsert.setText("UPDATE");
+
+                edtItemName.setText(Data.items_list.get(i).get("name"));
+                edtItemPrice.setText(Data.items_list.get(i).get("price"));
+                edtItemQuantity.setText(Data.items_list.get(i).get("quantity"));
+
+                popupWindow.setFocusable(true);
+                popupWindow.showAtLocation(linearLayoutStoreParent, Gravity.CENTER, 0, 0);
+
+
+                txtInsert.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+
+                        //input validation
+                        if (edtItemName.getText().toString().isEmpty()) {
+
+                            FancyToast.makeText(StoreActivity.this, "Please Enter Item Name", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
+                            return;
+
+                        } else if (edtItemQuantity.getText().toString().isEmpty()) {
+
+                            FancyToast.makeText(StoreActivity.this, "Please Enter Item Quantity", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
+                            return;
+
+                        } else if (edtItemPrice.getText().toString().isEmpty()) {
+
+                            FancyToast.makeText(StoreActivity.this, "Please Enter Item Price", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
+                            return;
+
+                        }
+
+                        //Item Hashmap
+                        HashMap<String, String> item_info = Data.items_list.get(i);
+                        item_info.put("name", edtItemName.getText().toString());
+                        item_info.put("quantity", edtItemQuantity.getText().toString());
+                        item_info.put("price", edtItemPrice.getText().toString());
+
+
+
+                        Data.items_list.set(i,item_info);
+
+
+                        storeListAdapter.notifyDataSetChanged();
+
+                        FancyToast.makeText(StoreActivity.this, "Updated", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
+                        popupWindow.setFocusable(false);
+                        popupWindow.dismiss();
+
+                    }
+                });
+
+
+                txtCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        FancyToast.makeText(StoreActivity.this, "Canceled", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
+                        popupWindow.setFocusable(false);
+                        popupWindow.dismiss();
+
+                    }
+                });
 
             }
         });

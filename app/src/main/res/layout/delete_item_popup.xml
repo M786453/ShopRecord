@@ -21,37 +21,21 @@
                 android:background="#2196F3"
                 android:gravity="center"
                 android:padding="5dp"
-                android:text="INSERT ITEM INFO"
+                android:text="DELETE ITEM"
                 android:textColor="#FBFBFB"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/edtItemName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:ems="10"
-                android:hint="Enter Item Name"
-                android:inputType="textPersonName" />
 
-            <EditText
-                android:id="@+id/edtItemQuantity"
+            <TextView
+                android:id="@+id/txtDeleteStatement"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:ems="10"
-                android:hint="Enter Item Quantity"
-                android:inputType="number" />
-
-            <EditText
-                android:id="@+id/edtItemPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:ems="10"
-                android:hint="Enter Item Price"
-                android:inputType="number" />
+                android:gravity="center"
+                android:padding="5dp"
+                android:text="Delete Statement"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -60,7 +44,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/txtInsertRecipient"
+                    android:id="@+id/txtDeleteItem"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="1dp"
@@ -70,13 +54,13 @@
                     android:background="#FFFFFF"
                     android:gravity="center"
                     android:padding="5dp"
-                    android:text="INSERT"
+                    android:text="DELETE"
                     android:textColor="#2196F3"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/txtCancelRecipient"
+                    android:id="@+id/txtCancelDelete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="1dp"
@@ -90,5 +74,7 @@
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
+
     </androidx.cardview.widget.CardView>
+
 </LinearLayout>
