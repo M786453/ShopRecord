@@ -4,11 +4,7 @@
 
     <item
         android:id="@+id/bill_print"
-        android:title="Print" />
-    <item
-        android:id="@+id/bill_share"
-        android:title="Share" />
-    <item
-        android:id="@+id/bill_done"
-        android:title="Done" />
+        android:icon="@drawable/print"
+        android:title="Print"
+        app:showAsAction="always" />
 </menu>

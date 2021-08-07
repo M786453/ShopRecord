@@ -1,8 +1,11 @@
 package com.example.shoprecord;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -11,7 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -32,6 +38,10 @@ public class StoreActivity extends AppCompatActivity {
     private boolean isPopupShowing;
     private StoreListAdapter storeListAdapter;
     private  LayoutInflater layoutInflater;
+    private AutoCompleteTextView autoCompleteTextView_Search;
+    private ArrayAdapter<String> arrayAdapter;
+    private ImageView imgSearch;
+    private StoreViewModel storeViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,18 +57,114 @@ public class StoreActivity extends AppCompatActivity {
         store_listview = findViewById(R.id.store_listview);
         fbtn_add_item = findViewById(R.id.fbtn_store);
         linearLayoutStoreParent = findViewById(R.id.linearLayoutStoreParent);
+        autoCompleteTextView_Search = findViewById(R.id.txt_search);
+        imgSearch = findViewById(R.id.imgSearch);
+
+        arrayAdapter = new ArrayAdapter<>(StoreActivity.this, android.R.layout.simple_dropdown_item_1line,Data.store_items_list);
+
+        autoCompleteTextView_Search.setAdapter(arrayAdapter);
+
+
 
         isPopupShowing = false;
         storeListAdapter = new StoreListAdapter(StoreActivity.this);
         store_listview.setAdapter(storeListAdapter);
         layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 
-        if(Data.items_list.size()>0){
+
+        storeViewModel = new ViewModelProvider(this).get(StoreViewModel.class);
+        
+        storeViewModel.getmAllStoreItems().observe(this,storeItems -> {
+
+
+            Data.store_items_list.clear();
+            Data.store_items_hm.clear();
+
+
+            //Update the cached copy of the items in the adapter
+
+            for(StoreItem e: storeItems){
+
+                Data.store_items_list.add(e.getItem_name());
+
+                //item info hm
+                HashMap<String,String> item_info_hm = new HashMap<>();
+                item_info_hm.put("price",e.getPrice());
+                item_info_hm.put("quantity",e.getQuantity());
+                item_info_hm.put("id",e.id+"");
+
+                Data.store_items_hm.put(e.getItem_name(),item_info_hm);
+
+                storeListAdapter.notifyDataSetChanged();
+                arrayAdapter.notifyDataSetChanged();
+
+            }
+
+            if(Data.store_items_list.size()>0){
+                if(empty_text.getVisibility()!=View.GONE) {
+                    empty_text.setVisibility(View.GONE);
+                    store_listview.setVisibility(View.VISIBLE);
+                }
+            }
+
+        });
+
+        if(Data.store_items_list.size()>0){
 
             empty_text.setVisibility(View.GONE);
             store_listview.setVisibility(View.VISIBLE);
 
         }
+
+
+
+
+
+        imgSearch.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onClick(View view) {
+
+                String query = autoCompleteTextView_Search.getText().toString();
+
+                if (query.isEmpty()){
+
+                    FancyToast.makeText(StoreActivity.this,"Search Query Is Empty",
+                            FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                    return;
+
+                }else if (!Data.store_items_list.contains(query)){
+
+                    FancyToast.makeText(StoreActivity.this,"Item Not Found",
+                            FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                    return;
+
+                }
+
+
+                for (int i=0;i<Data.store_items_list.size();i++){
+
+                    try {
+                        if (Data.store_items_list.get(i).equals(query)) {
+
+                            Log.i("pos", i + "");
+                            store_listview.smoothScrollToPosition(i);
+                            break;
+                        }
+                    }catch (Exception e){
+                        Log.i("Error",e.getMessage());
+
+                    }
+
+                }
+
+
+
+
+            }
+        });
+
+
 
 
         fbtn_add_item.setOnClickListener(new View.OnClickListener() {
@@ -90,34 +196,46 @@ public class StoreActivity extends AppCompatActivity {
                             public void onClick(View view) {
 
 
+                                String in_item_name = edtItemName.getText().toString();
+                                String in_item_quantity = edtItemQuantity.getText().toString();
+                                String in_item_price = edtItemPrice.getText().toString();
+
+
                                 //input validation
-                                if (edtItemName.getText().toString().isEmpty()) {
+                                if (in_item_name.isEmpty()) {
 
                                     FancyToast.makeText(StoreActivity.this, "Please Enter Item Name", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                                     return;
 
-                                } else if (edtItemQuantity.getText().toString().isEmpty()) {
+                                } else if (in_item_quantity.isEmpty()) {
 
                                     FancyToast.makeText(StoreActivity.this, "Please Enter Item Quantity", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                                     return;
 
-                                } else if (edtItemPrice.getText().toString().isEmpty()) {
+                                } else if (in_item_price.isEmpty()) {
 
                                     FancyToast.makeText(StoreActivity.this, "Please Enter Item Price", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                                     return;
 
+                                }else if(Data.store_items_list.contains(in_item_name)){
+
+                                    FancyToast.makeText(StoreActivity.this, "Item With Same Name Already Exists", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
+                                    return;
+
                                 }
 
-                                //Item Hashmap
-                                HashMap<String, String> item_info = new HashMap<>();
-                                item_info.put("name", edtItemName.getText().toString());
-                                item_info.put("quantity", edtItemQuantity.getText().toString());
-                                item_info.put("price", edtItemPrice.getText().toString());
+                                //local database code block
+                                try {
 
-                                Data.items_list.add(item_info);
 
-                                storeListAdapter.notifyDataSetChanged();
+                                    StoreItem storeItem = new StoreItem(in_item_name, in_item_price, in_item_quantity);
+                                    storeViewModel.insert(storeItem);
 
+                                }catch (Exception e){
+
+                                    Log.i("Error",e.getMessage());
+
+                                }
                                 if(store_listview.getVisibility()!=View.VISIBLE) {
 
                                     store_listview.setVisibility(View.VISIBLE);
@@ -127,7 +245,7 @@ public class StoreActivity extends AppCompatActivity {
                                 FancyToast.makeText(StoreActivity.this, "Item Added", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                 popupWindow.setFocusable(false);
 
-                                isPopupShowing = false;
+
 
                                 popupWindow.dismiss();
 
@@ -147,7 +265,7 @@ public class StoreActivity extends AppCompatActivity {
                                 FancyToast.makeText(StoreActivity.this, "Canceled", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                 popupWindow.setFocusable(false);
 
-                                isPopupShowing = false;
+
 
                                 popupWindow.dismiss();
 
@@ -191,9 +309,9 @@ public class StoreActivity extends AppCompatActivity {
                     TextView txtDelete = popupView.findViewById(R.id.txtDeleteItem);
                     TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDelete);
 
-                    String item = Data.items_list.get(i).get("name");
+                    String item_name = Data.store_items_list.get(i);
 
-                    txtDeleteStatement.setText("Are You Sure To Delete The Item \""+item+"\"?");
+                    txtDeleteStatement.setText("Are You Sure To Delete The Item \""+item_name+"\"?");
 
                     PopupWindow popupWindow = new PopupWindow(popupView,LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                     popupWindow.setFocusable(true);
@@ -204,12 +322,23 @@ public class StoreActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
 
+                            int id = Integer.parseInt(Data.store_items_hm.get(item_name).get("id"));
 
-                            Data.items_list.remove(i);
-                            storeListAdapter.notifyDataSetChanged();
-                            if (Data.items_list.size()==0){
+                            try {
+
+                                storeViewModel.delete(id);
+
+                            }catch (Exception e){
+
+                                Log.i("Error",e.getMessage());
+
+                            }
+
+                            if (Data.store_items_list.size()==0){
+
                                 store_listview.setVisibility(View.GONE);
                                 empty_text.setVisibility(View.VISIBLE);
+
                             }
 
                             popupWindow.setFocusable(false);
@@ -262,9 +391,12 @@ public class StoreActivity extends AppCompatActivity {
                 txtPopupStatement.setText("UPDATE ITEM INFO");
                 txtInsert.setText("UPDATE");
 
-                edtItemName.setText(Data.items_list.get(i).get("name"));
-                edtItemPrice.setText(Data.items_list.get(i).get("price"));
-                edtItemQuantity.setText(Data.items_list.get(i).get("quantity"));
+
+                String tappped_item_name = Data.store_items_list.get(i);
+
+                edtItemName.setText(tappped_item_name);
+                edtItemPrice.setText(Data.store_items_hm.get(tappped_item_name).get("price"));
+                edtItemQuantity.setText(Data.store_items_hm.get(tappped_item_name).get("quantity"));
 
                 popupWindow.setFocusable(true);
                 popupWindow.showAtLocation(linearLayoutStoreParent, Gravity.CENTER, 0, 0);
@@ -274,37 +406,43 @@ public class StoreActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
+                        String in_item_name = edtItemName.getText().toString();
+                        String in_item_quantity = edtItemQuantity.getText().toString();
+                        String in_item_price = edtItemPrice.getText().toString();
 
                         //input validation
-                        if (edtItemName.getText().toString().isEmpty()) {
+                        if (in_item_name.isEmpty()) {
 
                             FancyToast.makeText(StoreActivity.this, "Please Enter Item Name", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                             return;
 
-                        } else if (edtItemQuantity.getText().toString().isEmpty()) {
+                        } else if (in_item_quantity.isEmpty()) {
 
                             FancyToast.makeText(StoreActivity.this, "Please Enter Item Quantity", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                             return;
 
-                        } else if (edtItemPrice.getText().toString().isEmpty()) {
+                        } else if (in_item_price.isEmpty()) {
 
                             FancyToast.makeText(StoreActivity.this, "Please Enter Item Price", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                             return;
 
                         }
 
-                        //Item Hashmap
-                        HashMap<String, String> item_info = Data.items_list.get(i);
-                        item_info.put("name", edtItemName.getText().toString());
-                        item_info.put("quantity", edtItemQuantity.getText().toString());
-                        item_info.put("price", edtItemPrice.getText().toString());
+                        //Local database code block
+
+                        try {
 
 
 
-                        Data.items_list.set(i,item_info);
 
+                            storeViewModel.update(in_item_name,in_item_price,in_item_quantity,
+                                    Integer.parseInt(Data.store_items_hm.get(Data.store_items_list.get(i)).get("id")));
 
-                        storeListAdapter.notifyDataSetChanged();
+                        }catch (Exception e){
+
+                            Log.i("Error",e.getMessage());
+
+                        }
 
                         FancyToast.makeText(StoreActivity.this, "Updated", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                         popupWindow.setFocusable(false);
@@ -332,27 +470,9 @@ public class StoreActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.store_menu,menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
 
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        if (item.getItemId()==R.id.store_share){
-
-            FancyToast.makeText(StoreActivity.this,"Will Share The Store!",FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
-
-
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
 
     @Override

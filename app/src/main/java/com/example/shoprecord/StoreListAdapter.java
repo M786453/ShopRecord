@@ -23,12 +23,12 @@ public class StoreListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return Data.items_list.size();
+        return Data.store_items_list.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return Data.items_list.get(i);
+        return Data.store_items_list.get(i);
     }
 
     @Override
@@ -40,14 +40,17 @@ public class StoreListAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
 
         view = layoutInflater.inflate(R.layout.item_layout,null);
-        TextView item_name = view.findViewById(R.id.itemName);
-        TextView item_quantity = view.findViewById(R.id.item_quantity);
-        TextView item_price = view.findViewById(R.id.item_price);
+        TextView txt_item_name = view.findViewById(R.id.itemName);
+        TextView txt_item_quantity = view.findViewById(R.id.item_quantity);
+        TextView txt_item_price = view.findViewById(R.id.item_price);
 
         //setting values to ui components
-        item_name.setText(Data.items_list.get(i).get("name"));
-        item_price.setText(Data.items_list.get(i).get("price"));
-        item_quantity.setText(Data.items_list.get(i).get("quantity"));
+
+        String item_name = Data.store_items_list.get(i);
+
+        txt_item_name.setText(item_name);
+        txt_item_price.setText(Data.store_items_hm.get(item_name).get("price"));
+        txt_item_quantity.setText(Data.store_items_hm.get(item_name).get("quantity"));
 
 
         return view;

@@ -48,12 +48,15 @@ public class SingleBillListAdapter extends BaseAdapter {
         TextView txtItemName = view.findViewById(R.id.bill_item_name);
         TextView txtItemPrice = view.findViewById(R.id.bill_item_price);
         TextView txtItemQuantity = view.findViewById(R.id.bill_item_quantity);
-
+        TextView txtItemTotal = view.findViewById(R.id.bill_item_total);
         //setting values
         txtItemName.setText(bill_items_list.get(i).get("name"));
         txtItemPrice.setText(bill_items_list.get(i).get("price"));
         txtItemQuantity.setText(bill_items_list.get(i).get("quantity"));
 
+        int total = Integer.parseInt(bill_items_list.get(i).get("price")) * Integer.parseInt(bill_items_list.get(i).get("quantity"));
+
+        txtItemTotal.setText(total+"");
 
 
 
