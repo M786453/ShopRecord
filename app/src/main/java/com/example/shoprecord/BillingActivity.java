@@ -2,10 +2,12 @@ package com.example.shoprecord;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shashank.sony.fancytoastlib.FancyToast;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class BillingActivity extends AppCompatActivity {
@@ -31,6 +34,7 @@ public class BillingActivity extends AppCompatActivity {
     private ListView bill_recipient_listview;
     private BillsListAdapter billsListAdapter;
     private LayoutInflater layoutInflater;
+    private ShopViewModel shopViewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,12 +56,50 @@ public class BillingActivity extends AppCompatActivity {
 
         bill_recipient_listview.setAdapter(billsListAdapter);
 
+
+        shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
+
+        shopViewModel.getmAllRecipient().observe(this,recipients -> {
+
+
+        Data.bills_list.clear();
+
+        for (Recipient e: recipients){
+
+
+            HashMap<String,String> recipient_info = new HashMap<>();
+
+            recipient_info.put("id",e.id+"");
+            recipient_info.put("name",e.getName());
+            recipient_info.put("key",e.getKey());
+            recipient_info.put("date",e.getDate());
+            recipient_info.put("total",e.getTotal());
+
+            Data.bills_list.add(recipient_info);
+
+            billsListAdapter.notifyDataSetChanged();
+
+        }
+
+
+            if (Data.bills_list.size()>0){
+
+                bill_recipient_listview.setVisibility(View.VISIBLE);
+                txtEmptyBill.setVisibility(View.GONE);
+
+            }
+
+        });
+
         if (Data.bills_list.size()>0){
 
             bill_recipient_listview.setVisibility(View.VISIBLE);
             txtEmptyBill.setVisibility(View.GONE);
 
         }
+
+
+
 
         fbtn_add_bill.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,10 +243,21 @@ public class BillingActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
+
                         String key = Data.bills_list.get(i).get("key");
-                        Data.bill_info_map.remove(key);
-                        Data.bills_list.remove(i);
-                        billsListAdapter.notifyDataSetChanged();
+
+                        try {
+
+                            int id = Integer.parseInt(Data.store_items_hm.get(key).get("id"));
+                            shopViewModel.deleteRecipient(id);
+                            shopViewModel.deleteAllBills(key);
+
+                        }catch (Exception e){
+
+                            Log.i("Error",e.getMessage());
+
+                        }
+
 
                         popupWindow.setFocusable(false);
                         popupWindow.dismiss();

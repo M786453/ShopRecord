@@ -1,6 +1,5 @@
 package com.example.shoprecord;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -10,8 +9,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -41,7 +38,7 @@ public class StoreActivity extends AppCompatActivity {
     private AutoCompleteTextView autoCompleteTextView_Search;
     private ArrayAdapter<String> arrayAdapter;
     private ImageView imgSearch;
-    private StoreViewModel storeViewModel;
+    private ShopViewModel shopViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +69,9 @@ public class StoreActivity extends AppCompatActivity {
         layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 
 
-        storeViewModel = new ViewModelProvider(this).get(StoreViewModel.class);
+        shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
         
-        storeViewModel.getmAllStoreItems().observe(this,storeItems -> {
+        shopViewModel.getmAllStoreItems().observe(this, storeItems -> {
 
 
             Data.store_items_list.clear();
@@ -229,7 +226,7 @@ public class StoreActivity extends AppCompatActivity {
 
 
                                     StoreItem storeItem = new StoreItem(in_item_name, in_item_price, in_item_quantity);
-                                    storeViewModel.insert(storeItem);
+                                    shopViewModel.insert(storeItem);
 
                                 }catch (Exception e){
 
@@ -326,7 +323,7 @@ public class StoreActivity extends AppCompatActivity {
 
                             try {
 
-                                storeViewModel.delete(id);
+                                shopViewModel.delete(id);
 
                             }catch (Exception e){
 
@@ -435,7 +432,7 @@ public class StoreActivity extends AppCompatActivity {
 
 
 
-                            storeViewModel.update(in_item_name,in_item_price,in_item_quantity,
+                            shopViewModel.update(in_item_name,in_item_price,in_item_quantity,
                                     Integer.parseInt(Data.store_items_hm.get(Data.store_items_list.get(i)).get("id")));
 
                         }catch (Exception e){

@@ -3,6 +3,7 @@ package com.example.shoprecord;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +51,10 @@ public class SingleBillActivity extends AppCompatActivity {
     private String event;
     private String date="";
     private int pos;
+    private String key;
+
+    private ShopViewModel shopViewModel;
+    private ArrayList<String> item_name_list;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -67,26 +72,26 @@ public class SingleBillActivity extends AppCompatActivity {
         txt_recipient_name = findViewById(R.id.txt_SingleBill_recipient_name);
         txt_bill_date = findViewById(R.id.txt_SingleBill_Date);
         linearLayoutSingleBillParent = findViewById(R.id.linearLayoutSingleBillParent);
+        item_name_list = new ArrayList<>();
 
         isPopupShowing = false;
         bill_items_list = new ArrayList<>();
         layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         singleBillListAdapter = new SingleBillListAdapter(SingleBillActivity.this,bill_items_list);
-//        total = 0;
-
         bill_items_listview.setAdapter(singleBillListAdapter);
+
+        shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
 
 
 
         //checking in which mode user is i.e. View OR Add
         event = getIntent().getStringExtra("EVENT");
-
-
         if (event.equals("View")){
 
-        pos = getIntent().getIntExtra("POS",-1);
+            pos = getIntent().getIntExtra("POS",-1);
 
         if (pos==-1){
+
             FancyToast.makeText(this,"Something Wrong Happen!",FancyToast.LENGTH_SHORT,
                     FancyToast.ERROR,false).show();
             finish();
@@ -95,21 +100,7 @@ public class SingleBillActivity extends AppCompatActivity {
 
                 recipient_name = Data.bills_list.get(pos).get("name");
                 date = Data.bills_list.get(pos).get("date");
-                String key = Data.bills_list.get(pos).get("key");
-
-//                bill_items_list = Data.bill_info_map.get(key);
-                Log.i("key",key);
-                Log.i("size",Data.bill_info_map.get(key).size()+"");
-
-                for (HashMap<String,String> e: Data.bill_info_map.get(key)){
-
-//                    total += Integer.parseInt(e.get("price"))*Integer.parseInt(e.get("quantity"));
-                    bill_items_list.add(e);
-                    singleBillListAdapter.notifyDataSetChanged();
-
-                }
-
-                Log.i("list",Data.bill_info_map.get(key).size()+"");
+                key = Data.bills_list.get(pos).get("key");
 
 
         }
@@ -117,6 +108,9 @@ public class SingleBillActivity extends AppCompatActivity {
         }else if(event.equals("Add")){
 
             recipient_name = getIntent().getStringExtra("NAME");
+
+            Calendar cal = Calendar.getInstance();
+            key = cal.getTime().toString(); //get date with time which will be used as key for bill_info_map
 
             Date dateObj = new Date();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -128,6 +122,30 @@ public class SingleBillActivity extends AppCompatActivity {
         //setting value
         txt_recipient_name.setText(recipient_name);
         txt_bill_date.setText(date);
+
+
+
+        shopViewModel.getmAllBills(key).observe(this,bills -> {
+            item_name_list.clear();
+            bill_items_list.clear();
+
+            for (Bills e: bills){
+
+                HashMap<String,String> bill_info = new HashMap<>();
+                bill_info.put("id",e.id+"");
+                bill_info.put("name",e.getName());
+                bill_info.put("quantity",e.getQuantity());
+                bill_info.put("price",e.getPrice());
+                bill_info.put("key",e.getKey());
+
+                bill_items_list.add(bill_info);
+                item_name_list.add(e.getName());
+
+                singleBillListAdapter.notifyDataSetChanged();
+            }
+
+
+        });
 
 
 
@@ -150,6 +168,7 @@ public class SingleBillActivity extends AppCompatActivity {
                         popupWindow.setFocusable(true);
                         popupWindow.showAtLocation(linearLayoutSingleBillParent, Gravity.CENTER, 0, 0);
 
+
                         //ui components of popup
                         TextView txtInsert = popup_view.findViewById(R.id.txtInsert_single_bill);
                         TextView txtCancel = popup_view.findViewById(R.id.txtCancel_single_bill);
@@ -162,8 +181,9 @@ public class SingleBillActivity extends AppCompatActivity {
                                 android.R.layout.simple_dropdown_item_1line,Data.store_items_list);
                         edtItemName.setAdapter(adapter);
 
-                        //listening for click events
 
+
+                        //listening for click events
                         txtInsert.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -187,38 +207,21 @@ public class SingleBillActivity extends AppCompatActivity {
                                     FancyToast.makeText(SingleBillActivity.this, "Item Not Found In Store!", FancyToast.LENGTH_LONG, FancyToast.INFO, false).show();
                                     return;
 
+                                }else if(item_name_list.contains(in_item_name)){
+
+                                    FancyToast.makeText(SingleBillActivity.this, "Item With Same Name Already Exist!", FancyToast.LENGTH_LONG, FancyToast.INFO, false).show();
+                                    return;
+
+                                }else if (in_item_quantity.equals("0")){
+
+                                    FancyToast.makeText(SingleBillActivity.this, "Quantity Must Be Above Zero", FancyToast.LENGTH_LONG, FancyToast.INFO, false).show();
+                                    return;
+
                                 }
 
 
-                                //finding price
-
-//                                String price = "";
-//                                int available_quantity = 0;
-//                                int index = 0;
-//                                for (int i=0;i<Data.items_list.size();i++){
-//
-//                                    if (Data.items_list.get(i).get("name").equals(edtItemName.getText().toString())){
-//                                        index = i;
-//                                        price = Data.items_list.get(i).get("price");
-//                                        available_quantity = Integer.parseInt(Data.items_list.get(i).get("quantity"));
-//                                        break;
-//                                    }
-//
-//                                }
 
 
-
-//                                if (price.equals("")){
-//
-//                                    FancyToast.makeText(SingleBillActivity.this, "Item Not Found In Store!", FancyToast.LENGTH_LONG, FancyToast.INFO, false).show();
-//                                    return;
-//
-//                                }else if (available_quantity < Integer.parseInt(edtItemQuantity.getText().toString())){
-//
-//                                    FancyToast.makeText(SingleBillActivity.this, "Only "+available_quantity +" Items Available In Store!", FancyToast.LENGTH_LONG, FancyToast.INFO, false).show();
-//                                    return;
-//
-//                                }
 
                                 //item's info from store
                                 int available_quantity = Integer.parseInt(Data.store_items_hm.get(in_item_name).get("quantity"));
@@ -232,20 +235,22 @@ public class SingleBillActivity extends AppCompatActivity {
                                 }
 
 
+                                try {
+
+                                    //add bill_item in bill table
+                                    Bills bills = new Bills(in_item_name,price+"",in_item_quantity,key);
+                                    shopViewModel.insertBill(bills);
 
 
+                                    //updating store table
+                                    shopViewModel.updateStoreItem((available_quantity - Integer.parseInt(in_item_quantity))+"",in_item_name);
 
-                                //Item Hashmap
-                                HashMap<String, String> item_info = new HashMap<>();
-                                item_info.put("name", in_item_name);
-                                item_info.put("quantity", in_item_quantity);
-                                item_info.put("price", price + "");
+                                }catch (Exception e){
 
-                                bill_items_list.add(item_info);
-                                Data.store_items_hm.get(in_item_name).put("quantity",(available_quantity - Integer.parseInt(in_item_quantity)) + "");
-                                singleBillListAdapter.notifyDataSetChanged();
+                                    Log.i("Error",e.getMessage());
 
-//                                total += Integer.parseInt(price)*Integer.parseInt(edtItemQuantity.getText().toString());
+                                }
+
 
                                 FancyToast.makeText(SingleBillActivity.this, "Item Added", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                 popupWindow.setFocusable(false);
@@ -323,12 +328,19 @@ public class SingleBillActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
-//                        total -= Integer.parseInt(bill_items_list.get(i).get("price"));
-
                         int available_quantity = Integer.parseInt(Data.store_items_hm.get(item_name).get("quantity"));
-                        Data.store_items_hm.get(item_name).put("quantity",(available_quantity+quantity)+"");
-                        bill_items_list.remove(i);
-                        singleBillListAdapter.notifyDataSetChanged();
+
+
+                        try{
+
+                            shopViewModel.updateStoreItem((available_quantity+quantity)+"",item_name);
+                            shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
+
+                        }catch (Exception e){
+
+                            Log.i("Error",e.getMessage());
+
+                        }
 
                         popupWindow.setFocusable(false);
                         popupWindow.dismiss();
@@ -396,62 +408,63 @@ public class SingleBillActivity extends AppCompatActivity {
                             FancyToast.makeText(SingleBillActivity.this, "Please Enter Item Quantity", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                             return;
 
+                        }else if (!item_name_list.contains(in_item_name)){
+
+                            FancyToast.makeText(SingleBillActivity.this, "Item Not Found In Store", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
+                            return;
+
+                        }else if (in_item_quantity.equals("0")){
+
+                            FancyToast.makeText(SingleBillActivity.this, "Quantity Must Be Above Zero", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
+                            return;
+
                         }
 
-
-
-
-
-
-
-//                        total -= Integer.parseInt(bill_items_list.get(i).get("price"))*Integer.parseInt(bill_items_list.get(i).get("quantity"));
 
                         int in_quantity = Integer.parseInt(in_item_quantity);
                         int prev_quantity = Integer.parseInt(bill_items_list.get(i).get("quantity"));
                         int store_item_quantity = Integer.parseInt(Data.store_items_hm.get(in_item_name).get("quantity"));
 
-                        if (in_quantity>prev_quantity){
+                        try{
+                        if (in_quantity > prev_quantity) {
 
                             //if more than prev then minus from store
 
                             int quantity = in_quantity - prev_quantity;
 
 
-
-                            if (store_item_quantity<quantity){
-                                FancyToast.makeText(SingleBillActivity.this,"Only "+store_item_quantity+" Items Available In Store!",
-                                        FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                            if (store_item_quantity < quantity) {
+                                FancyToast.makeText(SingleBillActivity.this, "Only " + store_item_quantity + " Items Available In Store!",
+                                        FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                                 return;
-                                    }
-                            Data.store_items_hm.get(in_item_name).put("quantity",(store_item_quantity - quantity)+"");
+                            }
 
-                        }else if(in_quantity<prev_quantity){
+                            shopViewModel.updateStoreItem((store_item_quantity - quantity) + "", in_item_name);
+
+
+                        } else if (in_quantity < prev_quantity) {
 
                             //if less than prev then add in store
                             int quantity = prev_quantity - in_quantity;
 
-                            Data.store_items_hm.get(in_item_name).put("quantity",(store_item_quantity+quantity)+"");
+                            shopViewModel.updateStoreItem((store_item_quantity + quantity) + "", in_item_name);
 
                         }
 
 
-                        //Item Hashmap
-                        HashMap<String, String> item_info = bill_items_list.get(i);
-                        item_info.put("name", in_item_name);
-                        item_info.put("quantity", in_item_quantity);
-                        item_info.put("price", bill_items_list.get(i).get("price"));
 
-
-
-                        bill_items_list.set(i,item_info);
-
-//                        total += Integer.parseInt(bill_items_list.get(i).get("price"))*Integer.parseInt(bill_items_list.get(i).get("quantity"));
-
-                        singleBillListAdapter.notifyDataSetChanged();
+                        shopViewModel.updateBill(in_item_name,bill_items_list.get(i).get("price"),in_item_quantity,
+                                Integer.parseInt(bill_items_list.get(i).get("id")));
 
                         FancyToast.makeText(SingleBillActivity.this, "Updated", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                         popupWindow.setFocusable(false);
                         popupWindow.dismiss();
+
+                    }catch (Exception e){
+
+                            Log.i("Error",e.getMessage());
+
+                        }
 
                     }
                 });
@@ -525,12 +538,6 @@ public class SingleBillActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void saveData(){
 
-        Calendar cal = Calendar.getInstance();
-        String key = cal.getTime().toString(); //get date with time which will be used as key for bill_info_map
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-        String dateTime = dateTimeFormatter.format(localDateTime);
 
         //finding total
         int total = 0;
@@ -541,23 +548,23 @@ public class SingleBillActivity extends AppCompatActivity {
         }
 
 
-        //recipient info hashmap
-        HashMap<String,String> recipient_info_hm = new HashMap<>();
-        recipient_info_hm.put("name",recipient_name);
-        recipient_info_hm.put("dateTime",dateTime);
-        recipient_info_hm.put("key",key);
-        recipient_info_hm.put("total",total+"");
-        recipient_info_hm.put("date",date);
 
-        //setting values
+        //local database
+        try {
+            Recipient recipient = new Recipient(recipient_name,total+"",key,date);
 
-        if (event.equals("View")) {
-            Data.bills_list.set(pos, recipient_info_hm);
-        }else if(event.equals("Add")){
-            Data.bills_list.add(recipient_info_hm);
+            if (event.equals("View")) {
+                shopViewModel.updateRecipient(total+"",recipient_name);
+            }else if(event.equals("Add")){
+                shopViewModel.insertRecipient(recipient);
+            }
+
+
+        }catch (Exception e){
+            Log.i("Error",e.getMessage());
         }
 
-        Data.bill_info_map.put(key,bill_items_list);
+
 
         FancyToast.makeText(SingleBillActivity.this,"Bill Saved",
                 FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
