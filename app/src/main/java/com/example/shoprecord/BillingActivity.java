@@ -77,9 +77,11 @@ public class BillingActivity extends AppCompatActivity {
 
             Data.bills_list.add(recipient_info);
 
-            billsListAdapter.notifyDataSetChanged();
+
 
         }
+
+            billsListAdapter.notifyDataSetChanged();
 
 
             if (Data.bills_list.size()>0){
@@ -87,6 +89,9 @@ public class BillingActivity extends AppCompatActivity {
                 bill_recipient_listview.setVisibility(View.VISIBLE);
                 txtEmptyBill.setVisibility(View.GONE);
 
+            }else{
+                bill_recipient_listview.setVisibility(View.GONE);
+                txtEmptyBill.setVisibility(View.VISIBLE);
             }
 
         });
@@ -248,7 +253,7 @@ public class BillingActivity extends AppCompatActivity {
 
                         try {
 
-                            int id = Integer.parseInt(Data.store_items_hm.get(key).get("id"));
+                            int id = Integer.parseInt(Data.bills_list.get(i).get("id"));
                             shopViewModel.deleteRecipient(id);
                             shopViewModel.deleteAllBills(key);
 

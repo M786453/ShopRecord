@@ -92,16 +92,25 @@ public class StoreActivity extends AppCompatActivity {
 
                 Data.store_items_hm.put(e.getItem_name(),item_info_hm);
 
-                storeListAdapter.notifyDataSetChanged();
-                arrayAdapter.notifyDataSetChanged();
+
 
             }
+
+            storeListAdapter.notifyDataSetChanged();
+            arrayAdapter.notifyDataSetChanged();
 
             if(Data.store_items_list.size()>0){
                 if(empty_text.getVisibility()!=View.GONE) {
                     empty_text.setVisibility(View.GONE);
                     store_listview.setVisibility(View.VISIBLE);
                 }
+            }else{
+
+                if(empty_text.getVisibility()!=View.VISIBLE) {
+                    empty_text.setVisibility(View.VISIBLE);
+                    store_listview.setVisibility(View.GONE);
+                }
+
             }
 
         });

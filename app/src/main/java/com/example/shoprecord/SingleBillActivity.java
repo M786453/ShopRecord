@@ -141,9 +141,9 @@ public class SingleBillActivity extends AppCompatActivity {
                 bill_items_list.add(bill_info);
                 item_name_list.add(e.getName());
 
-                singleBillListAdapter.notifyDataSetChanged();
             }
 
+            singleBillListAdapter.notifyDataSetChanged();
 
         });
 
