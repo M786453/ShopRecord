@@ -120,13 +120,13 @@ public class ShopViewModel extends AndroidViewModel {
     }
 
 
-    public void updateRecipient(String bill_total,String recipient_name){
+    public void updateRecipient(String bill_total,int recipient_id){
 
 
         ShopRoomDatabase.databaseWriteExecutor.execute(() ->{
 
 
-            shopRepository.updateRecipient(bill_total,recipient_name);
+            shopRepository.updateRecipient(bill_total,recipient_id);
 
         });
 

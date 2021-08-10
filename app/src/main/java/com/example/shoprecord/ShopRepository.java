@@ -100,11 +100,11 @@ public class ShopRepository {
 
     }
 
-    void updateRecipient(String bill_total,String recipient_name){
+    void updateRecipient(String bill_total,int recipient_id){
 
         ShopRoomDatabase.databaseWriteExecutor.execute(() ->{
 
-            shopDao.updateRecipient(bill_total,recipient_name);
+            shopDao.updateRecipient(bill_total,recipient_id);
 
         });
 

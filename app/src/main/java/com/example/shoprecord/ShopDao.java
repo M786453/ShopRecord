@@ -45,8 +45,8 @@ public interface ShopDao {
     @Query("DELETE FROM recipient_table WHERE recipient_id= :recipient_id")
     void deleteRecipient(int recipient_id);
 
-    @Query("UPDATE recipient_table SET bill_total = :bill_total WHERE recipient_name = :recipient_name")
-    void updateRecipient(String bill_total,String recipient_name);
+    @Query("UPDATE recipient_table SET bill_total = :bill_total WHERE recipient_id = :recipient_id")
+    void updateRecipient(String bill_total,int recipient_id);
 
     //bills queries
 

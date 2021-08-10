@@ -59,4 +59,11 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata:$rootProject.lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.lifecycleVersion"
 
+    //bluetooth printer
+    implementation "com.github.mazenrashed:Printooth:1.2.1"
+
+    //picasso library
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+
 }

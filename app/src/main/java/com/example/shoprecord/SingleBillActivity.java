@@ -47,7 +47,6 @@ public class SingleBillActivity extends AppCompatActivity {
     private LayoutInflater layoutInflater;
     private LinearLayout linearLayoutSingleBillParent;
     private SingleBillListAdapter singleBillListAdapter;
-//    private int total;
     private String event;
     private String date="";
     private int pos;
@@ -113,7 +112,7 @@ public class SingleBillActivity extends AppCompatActivity {
             key = cal.getTime().toString(); //get date with time which will be used as key for bill_info_map
 
             Date dateObj = new Date();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm aa");
             date = simpleDateFormat.format(dateObj);
 
         }
@@ -554,9 +553,14 @@ public class SingleBillActivity extends AppCompatActivity {
             Recipient recipient = new Recipient(recipient_name,total+"",key,date);
 
             if (event.equals("View")) {
-                shopViewModel.updateRecipient(total+"",recipient_name);
+
+                int id = Integer.parseInt(Data.bills_list.get(pos).get("id"));
+                shopViewModel.updateRecipient(total+"",id);
+
             }else if(event.equals("Add")){
+
                 shopViewModel.insertRecipient(recipient);
+
             }
 
 
