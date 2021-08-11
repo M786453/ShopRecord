@@ -42,11 +42,14 @@ public interface ShopDao {
     @Query("SELECT * FROM recipient_table ORDER BY recipient_name ASC")
     LiveData<List<Recipient>> getAlphabetizeRecipients();
 
+    @Query("SELECT * FROM recipient_table WHERE bill_key= :key")
+    LiveData<Recipient> getRecipientByKey(String key);
+
     @Query("DELETE FROM recipient_table WHERE recipient_id= :recipient_id")
     void deleteRecipient(int recipient_id);
 
-    @Query("UPDATE recipient_table SET bill_total = :bill_total WHERE recipient_id = :recipient_id")
-    void updateRecipient(String bill_total,int recipient_id);
+    @Query("UPDATE recipient_table SET bill_total = :bill_total WHERE bill_key = :key")
+    void updateRecipient(String bill_total,String key);
 
     //bills queries
 

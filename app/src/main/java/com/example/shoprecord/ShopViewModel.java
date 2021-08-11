@@ -95,6 +95,12 @@ public class ShopViewModel extends AndroidViewModel {
 
     }
 
+    LiveData<Recipient> getRecipientByKey(String key){
+
+       return shopRepository.getRecipientByKey(key);
+
+    }
+
 
     public void insertRecipient(Recipient recipient){
 
@@ -120,13 +126,13 @@ public class ShopViewModel extends AndroidViewModel {
     }
 
 
-    public void updateRecipient(String bill_total,int recipient_id){
+    public void updateRecipient(String bill_total,String key){
 
 
         ShopRoomDatabase.databaseWriteExecutor.execute(() ->{
 
 
-            shopRepository.updateRecipient(bill_total,recipient_id);
+            shopRepository.updateRecipient(bill_total,key);
 
         });
 

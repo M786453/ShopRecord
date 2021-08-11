@@ -15,6 +15,8 @@ public class ShopRepository {
 
     private LiveData<List<Recipient>> mAllRecipients;
 
+
+
     ShopRepository(Application application){
 
         ShopRoomDatabase db = ShopRoomDatabase.getDatabase(application);
@@ -22,6 +24,7 @@ public class ShopRepository {
         mAllItems = shopDao.getAlphabetizedWords();
 
         mAllRecipients = shopDao.getAlphabetizeRecipients();
+
 
     }
 
@@ -80,6 +83,11 @@ public class ShopRepository {
 
     }
 
+    LiveData<Recipient> getRecipientByKey(String key){
+
+
+        return shopDao.getRecipientByKey(key);
+    }
 
     void insertRecipient(Recipient recipient){
 
@@ -100,11 +108,11 @@ public class ShopRepository {
 
     }
 
-    void updateRecipient(String bill_total,int recipient_id){
+    void updateRecipient(String bill_total,String key){
 
         ShopRoomDatabase.databaseWriteExecutor.execute(() ->{
 
-            shopDao.updateRecipient(bill_total,recipient_id);
+            shopDao.updateRecipient(bill_total,key);
 
         });
 

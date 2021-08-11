@@ -29,6 +29,13 @@
             android:gravity="center"
             android:text="Ph#: 03427870419" />
 
+        <TextView
+            android:id="@+id/bill_no"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Bill#: " />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,9 +118,19 @@
             <ListView
                 android:id="@+id/bill_items_listview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
             </ListView>
+
+            <TextView
+                android:id="@+id/txtTotal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:paddingLeft="15dp"
+                android:text="TOTAL"
+                android:textStyle="bold" />
 
         </LinearLayout>
 

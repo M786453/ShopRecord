@@ -1,9 +1,13 @@
 package com.example.shoprecord;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 
@@ -21,6 +25,14 @@ public class HomeActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
 
+
+
+        //checking for bluetooth permission
+        if(ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED){
+
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.BLUETOOTH},1000);
+
+        }
 
         shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
 

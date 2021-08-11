@@ -13,6 +13,13 @@
         android:textSize="16sp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/txtBillNo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:text="BILL#: " />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="5dp"
+            android:paddingLeft="5dp"
             android:text="Total" />
 
         <TextView
@@ -31,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="5dp"
+            android:paddingLeft="5dp"
             android:text="Date" />
 
     </LinearLayout>

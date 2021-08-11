@@ -4,12 +4,12 @@ plugins {
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.0"
+    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.example.shoprecord"
         vectorDrawables.useSupportLibrary = true
-        minSdkVersion 16
+        minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -59,11 +59,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata:$rootProject.lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$rootProject.lifecycleVersion"
 
-    //bluetooth printer
-    implementation "com.github.mazenrashed:Printooth:1.2.1"
-
-    //picasso library
-    implementation 'com.squareup.picasso:picasso:2.71828'
+    //thermal printer library
+    implementation 'com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.0.0'
+    
 
 
 }

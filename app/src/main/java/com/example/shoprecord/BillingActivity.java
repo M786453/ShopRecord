@@ -219,6 +219,7 @@ public class BillingActivity extends AppCompatActivity {
             Intent intent = new Intent(BillingActivity.this,SingleBillActivity.class);
             intent.putExtra("EVENT","View");
             intent.putExtra("POS",i);
+
             startActivity(intent);
 
 

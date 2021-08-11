@@ -1,10 +1,17 @@
 package com.example.shoprecord;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +29,11 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.dantsu.escposprinter.EscPosPrinter;
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection;
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.text.SimpleDateFormat;
@@ -51,9 +62,12 @@ public class SingleBillActivity extends AppCompatActivity {
     private String date="";
     private int pos;
     private String key;
-
+    private int total;
     private ShopViewModel shopViewModel;
     private ArrayList<String> item_name_list;
+    private TextView txtTotal,txtBillNo;
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -70,14 +84,20 @@ public class SingleBillActivity extends AppCompatActivity {
         bill_items_listview = findViewById(R.id.bill_items_listview);
         txt_recipient_name = findViewById(R.id.txt_SingleBill_recipient_name);
         txt_bill_date = findViewById(R.id.txt_SingleBill_Date);
+        txtTotal = findViewById(R.id.txtTotal);
+        txtBillNo = findViewById(R.id.bill_no);
         linearLayoutSingleBillParent = findViewById(R.id.linearLayoutSingleBillParent);
         item_name_list = new ArrayList<>();
-
+        total = 0;
         isPopupShowing = false;
         bill_items_list = new ArrayList<>();
         layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         singleBillListAdapter = new SingleBillListAdapter(SingleBillActivity.this,bill_items_list);
         bill_items_listview.setAdapter(singleBillListAdapter);
+
+
+
+
 
         shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
 
@@ -100,6 +120,8 @@ public class SingleBillActivity extends AppCompatActivity {
                 recipient_name = Data.bills_list.get(pos).get("name");
                 date = Data.bills_list.get(pos).get("date");
                 key = Data.bills_list.get(pos).get("key");
+                String id = Data.bills_list.get(pos).get("id");
+                txtBillNo.setText("Bill#: "+id);
 
 
         }
@@ -115,8 +137,23 @@ public class SingleBillActivity extends AppCompatActivity {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm aa");
             date = simpleDateFormat.format(dateObj);
 
-        }
+            Recipient recipient = new Recipient(recipient_name,"0",key,date);
+            shopViewModel.insertRecipient(recipient);
+            try {
+                shopViewModel.getRecipientByKey(key).observe(this,recipient1 -> {
 
+                    int id = recipient1.id;
+                    txtBillNo.setText("Bill#: "+id+"");
+                    Log.i("Recipient_id", recipient1.id + "");
+
+                });
+
+            }catch (Exception e){
+                Log.i("Recipient_error",e.getMessage());
+            }
+            }
+
+        Log.i("key",key);
 
         //setting value
         txt_recipient_name.setText(recipient_name);
@@ -127,7 +164,7 @@ public class SingleBillActivity extends AppCompatActivity {
         shopViewModel.getmAllBills(key).observe(this,bills -> {
             item_name_list.clear();
             bill_items_list.clear();
-
+            int total = 0;
             for (Bills e: bills){
 
                 HashMap<String,String> bill_info = new HashMap<>();
@@ -140,8 +177,11 @@ public class SingleBillActivity extends AppCompatActivity {
                 bill_items_list.add(bill_info);
                 item_name_list.add(e.getName());
 
+                total += Integer.parseInt(e.getQuantity())*Integer.parseInt(e.getPrice());
             }
 
+            txtTotal.setText("TOTAL: "+total+"");
+            shopViewModel.updateRecipient(total+"",key);
             singleBillListAdapter.notifyDataSetChanged();
 
         });
@@ -243,6 +283,8 @@ public class SingleBillActivity extends AppCompatActivity {
 
                                     //updating store table
                                     shopViewModel.updateStoreItem((available_quantity - Integer.parseInt(in_item_quantity))+"",in_item_name);
+                                    Data.store_items_hm.get(in_item_name).put("quantity",(available_quantity - Integer.parseInt(in_item_quantity))+"");
+
 
                                 }catch (Exception e){
 
@@ -333,7 +375,9 @@ public class SingleBillActivity extends AppCompatActivity {
                         try{
 
                             shopViewModel.updateStoreItem((available_quantity+quantity)+"",item_name);
+                            Data.store_items_hm.get(item_name).put("quantity",(available_quantity+quantity)+"");
                             shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
+
 
                         }catch (Exception e){
 
@@ -439,7 +483,7 @@ public class SingleBillActivity extends AppCompatActivity {
                             }
 
                             shopViewModel.updateStoreItem((store_item_quantity - quantity) + "", in_item_name);
-
+                            Data.store_items_hm.get(in_item_name).put("quantity",(store_item_quantity - quantity) + "");
 
                         } else if (in_quantity < prev_quantity) {
 
@@ -447,13 +491,15 @@ public class SingleBillActivity extends AppCompatActivity {
                             int quantity = prev_quantity - in_quantity;
 
                             shopViewModel.updateStoreItem((store_item_quantity + quantity) + "", in_item_name);
-
+                            Data.store_items_hm.get(in_item_name).put("quantity",(store_item_quantity + quantity) + "");
                         }
 
 
 
                         shopViewModel.updateBill(in_item_name,bill_items_list.get(i).get("price"),in_item_quantity,
                                 Integer.parseInt(bill_items_list.get(i).get("id")));
+
+
 
                         FancyToast.makeText(SingleBillActivity.this, "Updated", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                         popupWindow.setFocusable(false);
@@ -505,8 +551,18 @@ public class SingleBillActivity extends AppCompatActivity {
         switch (item.getItemId()){
 
             case R.id.bill_print:
-                FancyToast.makeText(SingleBillActivity.this,"Will Print The Bill",
-                        FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+
+                //checking for bluetooth permission
+                if(ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED){
+
+                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.BLUETOOTH},1000);
+
+                }else {
+                    printText();
+                }
+                
+
+
                 break;
 
         }
@@ -515,28 +571,48 @@ public class SingleBillActivity extends AppCompatActivity {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public boolean onSupportNavigateUp() {
+    private void printText() {
 
-        saveData();
+        try {
 
-        return super.onSupportNavigateUp();
+            EscPosPrinter printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32);
+
+            int total = calculateTotal();
+
+            //header
+
+            String text =
+                    "[L]\n"+
+                    "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
+                    "[C]<b>Ph# 03427870419</b>\n" +
+                    "[L]"+recipient_name+"[R]"+date+"\n" +
+                    "[C]===============================================\n" +
+                    "[L]<b>Item Name</b>[C]<b>Qty</b>[C]<b>Price</b>[R]<b>Total</b>\n"+
+                    "[C]===============================================\n";
+
+            //body
+            for (HashMap<String,String> e:bill_items_list){
+
+                text += "[L]"+e.get("name")+"[C]"+e.get("quantity")+"[C]"+e.get("price")+"[R]"+(Integer.parseInt(e.get("price"))*Integer.parseInt(e.get("quantity")))+"\n";
+
+            }
+
+
+            //footer
+                text += "[R]"+total+"\n";
+            printer.printFormattedText(text);
+
+            FancyToast.makeText(this,"Printed",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
+
+
+        }catch (Exception e){
+
+            Log.i("Printer_Error",e.getMessage());
+
+        }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public void onBackPressed() {
-
-        saveData();
-
-        super.onBackPressed();
-
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void saveData(){
-
+    private int calculateTotal() {
 
         //finding total
         int total = 0;
@@ -546,36 +622,39 @@ public class SingleBillActivity extends AppCompatActivity {
 
         }
 
-
-
-        //local database
-        try {
-            Recipient recipient = new Recipient(recipient_name,total+"",key,date);
-
-            if (event.equals("View")) {
-
-                int id = Integer.parseInt(Data.bills_list.get(pos).get("id"));
-                shopViewModel.updateRecipient(total+"",id);
-
-            }else if(event.equals("Add")){
-
-                shopViewModel.insertRecipient(recipient);
-
-            }
-
-
-        }catch (Exception e){
-            Log.i("Error",e.getMessage());
-        }
-
-
-
-        FancyToast.makeText(SingleBillActivity.this,"Bill Saved",
-                FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
-
-        finish();
-
+        return total;
 
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public boolean onSupportNavigateUp() {
+
+        finish();
+
+        return super.onSupportNavigateUp();
+    }
+
+
+
+
+
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable  Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode ==1000 && resultCode == RESULT_OK){
+
+            printText();
+
+        }else{
+
+            FancyToast.makeText(this,"Cannot Print Without Bluetooth Permission",FancyToast.LENGTH_SHORT,FancyToast.ERROR,false).show();
+
+        }
+    }
 }

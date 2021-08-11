@@ -42,12 +42,13 @@ public class BillsListAdapter extends BaseAdapter {
         TextView txtRecipientName = view.findViewById(R.id.txt_bill_recipient_name);
         TextView txtBillDate = view.findViewById(R.id.txt_bill_date);
         TextView txtBillTotal = view.findViewById(R.id.txt_bill_total);
+        TextView txtBillNo = view.findViewById(R.id.txtBillNo);
 
         //setting values
         txtRecipientName.setText(Data.bills_list.get(i).get("name"));
         txtBillDate.setText(Data.bills_list.get(i).get("date"));
         txtBillTotal.setText("Rs."+Data.bills_list.get(i).get("total"));
-
+        txtBillNo.setText("Bill#: "+Data.bills_list.get(i).get("id"));
         return view;
     }
 }
