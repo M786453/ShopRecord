@@ -96,7 +96,7 @@ public class SingleBillActivity extends AppCompatActivity {
         bill_items_listview.setAdapter(singleBillListAdapter);
 
 
-
+        Log.i("Store_Item",Data.store_items_list.toString());
 
 
         shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
@@ -183,6 +183,8 @@ public class SingleBillActivity extends AppCompatActivity {
             txtTotal.setText("TOTAL: "+total+"");
             shopViewModel.updateRecipient(total+"",key);
             singleBillListAdapter.notifyDataSetChanged();
+
+            Log.i("bill_item", bill_items_list.toString());
 
         });
 
@@ -369,13 +371,21 @@ public class SingleBillActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
-                        int available_quantity = Integer.parseInt(Data.store_items_hm.get(item_name).get("quantity"));
+                        boolean canModifyStore=true;
+
+                        if (!Data.store_items_list.contains(item_name))
+                            canModifyStore = false;
+
+                        int available_quantity=0;
+                        if (canModifyStore)
+                        available_quantity = Integer.parseInt(Data.store_items_hm.get(item_name).get("quantity"));
 
 
                         try{
-
-                            shopViewModel.updateStoreItem((available_quantity+quantity)+"",item_name);
-                            Data.store_items_hm.get(item_name).put("quantity",(available_quantity+quantity)+"");
+                                if (canModifyStore) {
+                                    shopViewModel.updateStoreItem((available_quantity + quantity) + "", item_name);
+                                    Data.store_items_hm.get(item_name).put("quantity", (available_quantity + quantity) + "");
+                                }
                             shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
 
 
@@ -451,7 +461,7 @@ public class SingleBillActivity extends AppCompatActivity {
                             FancyToast.makeText(SingleBillActivity.this, "Please Enter Item Quantity", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                             return;
 
-                        }else if (!item_name_list.contains(in_item_name)){
+                        }else if (!Data.store_items_list.contains(in_item_name)){
 
                             FancyToast.makeText(SingleBillActivity.this, "Item Not Found In Store", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                             return;
