@@ -12,7 +12,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -21,6 +24,7 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.shashank.sony.fancytoastlib.FancyToast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -35,6 +39,10 @@ public class BillingActivity extends AppCompatActivity {
     private BillsListAdapter billsListAdapter;
     private LayoutInflater layoutInflater;
     private ShopViewModel shopViewModel;
+    private AutoCompleteTextView autoCompleteTextView_Recipient;
+    private ImageView imgSearchRecipient;
+    private ArrayAdapter<String> bill_name_adapter;
+    private ArrayList<String> bill_name_list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,13 +57,17 @@ public class BillingActivity extends AppCompatActivity {
         linearLayoutBillParent = findViewById(R.id.linearLayoutBillParent);
         bill_recipient_listview = findViewById(R.id.bills_listview);
         txtEmptyBill = findViewById(R.id.txtEmptyBill);
+        autoCompleteTextView_Recipient = findViewById(R.id.txt_search_recipient);
+        imgSearchRecipient = findViewById(R.id.imgSearchRecipient);
+        bill_name_list = new ArrayList<>();
 
         isShowingPopup = false;
         billsListAdapter = new BillsListAdapter(BillingActivity.this);
+        bill_name_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, bill_name_list);
         layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 
         bill_recipient_listview.setAdapter(billsListAdapter);
-
+//        autoCompleteTextView_Recipient.setAdapter(bill_id_adapter);
 
         shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
 
@@ -63,6 +75,7 @@ public class BillingActivity extends AppCompatActivity {
 
 
         Data.bills_list.clear();
+        bill_name_list.clear();
 
         for (Recipient e: recipients){
 
@@ -76,14 +89,15 @@ public class BillingActivity extends AppCompatActivity {
             recipient_info.put("total",e.getTotal());
 
             Data.bills_list.add(recipient_info);
-
+            if (!bill_name_list.contains(e.getName()))
+            bill_name_list.add(e.getName());
 
 
         }
 
             billsListAdapter.notifyDataSetChanged();
-
-
+            bill_name_adapter.notifyDataSetChanged();
+            autoCompleteTextView_Recipient.setAdapter(bill_name_adapter);
             if (Data.bills_list.size()>0){
 
                 bill_recipient_listview.setVisibility(View.VISIBLE);
@@ -105,6 +119,44 @@ public class BillingActivity extends AppCompatActivity {
 
 
 
+
+        imgSearchRecipient.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String query = autoCompleteTextView_Recipient.getText().toString();
+
+                if (query.isEmpty()){
+
+                    FancyToast.makeText(BillingActivity.this,"Search Query Is Empty",
+                            FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                    return;
+
+                }else if (!bill_name_list.contains(query)){
+
+                    FancyToast.makeText(BillingActivity.this,"Bill Not Found",
+                            FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                    return;
+
+                }
+
+
+                for (int i = 0; i< bill_name_list.size(); i++){
+
+                    try {
+                        if (bill_name_list.get(i).equals(query)) {
+
+                            Log.i("pos", i + "");
+                            bill_recipient_listview.smoothScrollToPosition(i);
+                            break;
+                        }
+                    }catch (Exception e){
+                        Log.i("Error",e.getMessage());
+
+                    }
+
+                }
+            }
+        });
 
         fbtn_add_bill.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -155,6 +155,7 @@ public class StoreActivity extends AppCompatActivity {
 
                             Log.i("pos", i + "");
                             store_listview.smoothScrollToPosition(i);
+
                             break;
                         }
                     }catch (Exception e){
