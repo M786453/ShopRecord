@@ -203,7 +203,7 @@ public class StoreActivity extends AppCompatActivity {
                             public void onClick(View view) {
 
 
-                                String in_item_name = edtItemName.getText().toString();
+                                String in_item_name = edtItemName.getText().toString().toUpperCase();
                                 String in_item_quantity = edtItemQuantity.getText().toString();
                                 String in_item_price = edtItemPrice.getText().toString();
 
@@ -413,7 +413,7 @@ public class StoreActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
-                        String in_item_name = edtItemName.getText().toString();
+                        String in_item_name = edtItemName.getText().toString().toUpperCase();
                         String in_item_quantity = edtItemQuantity.getText().toString();
                         String in_item_price = edtItemPrice.getText().toString();
 

@@ -382,11 +382,13 @@ public class SingleBillActivity extends AppCompatActivity {
 
 
                         try{
+
                                 if (canModifyStore) {
                                     shopViewModel.updateStoreItem((available_quantity + quantity) + "", item_name);
                                     Data.store_items_hm.get(item_name).put("quantity", (available_quantity + quantity) + "");
                                 }
-                            shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
+
+                                shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
 
 
                         }catch (Exception e){
