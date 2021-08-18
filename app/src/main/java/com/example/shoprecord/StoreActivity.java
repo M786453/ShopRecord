@@ -99,6 +99,8 @@ public class StoreActivity extends AppCompatActivity {
             storeListAdapter.notifyDataSetChanged();
             arrayAdapter.notifyDataSetChanged();
 
+            Log.i("Store_items",Data.store_items_list.toString());
+
             if(Data.store_items_list.size()>0){
                 if(empty_text.getVisibility()!=View.GONE) {
                     empty_text.setVisibility(View.GONE);

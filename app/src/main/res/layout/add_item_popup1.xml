@@ -31,7 +31,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:hint="Enter Item Name" />
+                android:hint="Enter Item Name"
+                android:inputType="text"
+                android:maxLines="1" />
 
             <EditText
                 android:id="@+id/edt_item_quantity"
@@ -40,7 +42,8 @@
                 android:layout_margin="10dp"
                 android:ems="10"
                 android:hint="Enter Item Quantity"
-                android:inputType="number" />
+                android:inputType="number"
+                android:maxLength="10" />
 
 
 

@@ -31,9 +31,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 "
                 android:ems="10"
                 android:hint="Enter Item Name"
-                android:inputType="textPersonName" />
+
+                android:inputType="text"
+                android:maxLength="30"
+                android:maxLines="1" />
 
             <EditText
                 android:id="@+id/edtItemQuantity"
@@ -42,7 +46,8 @@
                 android:layout_margin="10dp"
                 android:ems="10"
                 android:hint="Enter Item Quantity"
-                android:inputType="number" />
+                android:inputType="number"
+                android:maxLength="10" />
 
             <EditText
                 android:id="@+id/edtItemPrice"
@@ -51,7 +56,8 @@
                 android:layout_margin="10dp"
                 android:ems="10"
                 android:hint="Enter Item Price"
-                android:inputType="number" />
+                android:inputType="number"
+                android:maxLength="10" />
 
             <LinearLayout
                 android:layout_width="match_parent"

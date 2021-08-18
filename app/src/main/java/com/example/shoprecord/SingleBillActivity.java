@@ -1,17 +1,19 @@
 package com.example.shoprecord;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.Manifest;
-import android.app.Activity;
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,20 +32,21 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.dantsu.escposprinter.EscPosPrinter;
-import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection;
+import com.dantsu.escposprinter.connection.DeviceConnection;
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections;
+import com.dantsu.escposprinter.connection.usb.UsbConnection;
+import com.dantsu.escposprinter.connection.usb.UsbPrintersConnections;
+import com.example.shoprecord.async.AsyncEscPosPrinter;
+import com.example.shoprecord.async.AsyncUsbEscPosPrint;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 public class SingleBillActivity extends AppCompatActivity {
@@ -229,6 +232,8 @@ public class SingleBillActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View view) {
 
+                                try {
+
                                 String in_item_name = edtItemName.getText().toString();
                                 String in_item_quantity = edtItemQuantity.getText().toString();
 
@@ -276,7 +281,7 @@ public class SingleBillActivity extends AppCompatActivity {
                                 }
 
 
-                                try {
+
 
                                     //add bill_item in bill table
                                     Bills bills = new Bills(in_item_name,price+"",in_item_quantity,key);
@@ -441,6 +446,8 @@ public class SingleBillActivity extends AppCompatActivity {
                 edtItemName.setText(bill_items_list.get(i).get("name"));
                 edtItemQuantity.setText(bill_items_list.get(i).get("quantity"));
 
+                edtItemName.setFocusable(false);
+
                 popupWindow.setFocusable(true);
                 popupWindow.showAtLocation(linearLayoutSingleBillParent, Gravity.CENTER, 0, 0);
 
@@ -564,16 +571,7 @@ public class SingleBillActivity extends AppCompatActivity {
 
             case R.id.bill_print:
 
-                //checking for bluetooth permission
-                if(ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED){
-
-                    ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.BLUETOOTH},1000);
-
-                }else {
-                    printText();
-                }
-                
-
+                printUsb();
 
                 break;
 
@@ -586,39 +584,73 @@ public class SingleBillActivity extends AppCompatActivity {
     private void printText() {
 
         try {
+               BluetoothPrintersConnections bluetoothPrintersConnections = new BluetoothPrintersConnections();
 
-            EscPosPrinter printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32);
+            if (bluetoothPrintersConnections.getList().length>0){
 
-            int total = calculateTotal();
+                if (BluetoothPrintersConnections.selectFirstPaired().isConnected()){
 
-            //header
+                    EscPosPrinter printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32);
 
-            String text =
-                    "[L]\n"+
-                    "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
-                    "[C]<b>Ph# 03427870419</b>\n" +
-                    "[L]"+recipient_name+"[R]"+date+"\n" +
-                    "[C]===============================================\n" +
-                    "[L]<b>Item Name</b>[C]<b>Qty</b>[C]<b>Price</b>[R]<b>Total</b>\n"+
-                    "[C]===============================================\n";
+                    int total = calculateTotal();
 
-            //body
-            for (HashMap<String,String> e:bill_items_list){
+                    //header
 
-                text += "[L]"+e.get("name")+"[C]"+e.get("quantity")+"[C]"+e.get("price")+"[R]"+(Integer.parseInt(e.get("price"))*Integer.parseInt(e.get("quantity")))+"\n";
+                    String text =
+                            "[L]\n"+
+                                    "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
+                                    "[C]<b>Ph# 03427870419</b>\n" +
+                                    "[L]"+recipient_name+"[R]"+date+"\n" +
+                                    "[C]===============================================\n" +
+                                    "[L]<b>Item Name</b>[C]<b>Qty</b>[C]<b>Price</b>[R]<b>Total</b>\n"+
+                                    "[C]===============================================\n";
+
+                    //body
+                    for (HashMap<String,String> e:bill_items_list){
+
+                        text += "[L]"+e.get("name")+"[C]"+e.get("quantity")+"[C]"+e.get("price")+"[R]"+(Integer.parseInt(e.get("price"))*Integer.parseInt(e.get("quantity")))+"\n";
+
+                    }
+
+
+                    //footer
+                    text += "[R]"+total+"\n";
+                    printer.printFormattedText(text);
+
+                    FancyToast.makeText(this,"Printing",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
+
+
+
+                }else{
+
+
+                    new AlertDialog.Builder(this)
+                            .setTitle("Printer")
+                            .setMessage("Printer Not Connected To Device")
+                            .setNegativeButton(android.R.string.no,null)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+
+                }
+
+
+
+            }else{
+
+                new AlertDialog.Builder(this)
+                        .setTitle("Printer")
+                        .setMessage("Printer Not Found")
+                        .setNegativeButton(android.R.string.no,null)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+
 
             }
 
 
-            //footer
-                text += "[R]"+total+"\n";
-            printer.printFormattedText(text);
-
-            FancyToast.makeText(this,"Printed",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
-
 
         }catch (Exception e){
-
+            if (e !=null)
             Log.i("Printer_Error",e.getMessage());
 
         }
@@ -651,22 +683,91 @@ public class SingleBillActivity extends AppCompatActivity {
 
 
 
+   /*==============================================================================================
+    ===========================================USB PART=============================================
+    ==============================================================================================*/
+
+    private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
+    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (SingleBillActivity.ACTION_USB_PERMISSION.equals(action)) {
+                synchronized (this) {
+                    UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+                    UsbDevice usbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        if (usbManager != null && usbDevice != null) {
+
+                            new AsyncUsbEscPosPrint(context)
+                                    .execute(getAsyncEscPosPrinter(new UsbConnection(usbManager, usbDevice)));
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    public void printUsb() {
+        UsbConnection usbConnection = UsbPrintersConnections.selectFirstConnected(this);
+        UsbManager usbManager = (UsbManager) this.getSystemService(Context.USB_SERVICE);
+
+        if (usbConnection == null || usbManager == null) {
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle("USB Connection")
+                    .setMessage("No USB printer found.")
+                    .show();
+            return;
+        }
+
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(SingleBillActivity.ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(SingleBillActivity.ACTION_USB_PERMISSION);
+        registerReceiver(this.usbReceiver, filter);
+        usbManager.requestPermission(usbConnection.getDevice(), permissionIntent);
+    }
 
 
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable  Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    /*==============================================================================================
+    ===================================ESC/POS PRINTER PART=========================================
+    ==============================================================================================*/
 
-        if (requestCode ==1000 && resultCode == RESULT_OK){
 
-            printText();
+    /**
+     * Asynchronous printing
+     */
+    @SuppressLint("SimpleDateFormat")
+    public AsyncEscPosPrinter getAsyncEscPosPrinter(DeviceConnection printerConnection) {
 
-        }else{
+        AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
 
-            FancyToast.makeText(this,"Cannot Print Without Bluetooth Permission",FancyToast.LENGTH_SHORT,FancyToast.ERROR,false).show();
+        int total = calculateTotal();
+
+        //header
+
+        StringBuilder text =
+                new StringBuilder("[L]\n" +
+                        "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
+                        "[C]<b>Ph# 03427870419</b>\n" +
+                        "[L]" + recipient_name + "[R]" + date + "\n" +
+                        "[C]=================================\n" +
+                        "[L]Item Name[C]Qty[C]Price[R]Total\n" +
+                        "[C]=================================\n");
+
+        //body
+        for (HashMap<String,String> e:bill_items_list){
+
+            text.append("[L]").append(e.get("name")).append("[C]").append(e.get("quantity")).append("[C]").append(e.get("price")).append("[R]").append(Integer.parseInt(e.get("price")) * Integer.parseInt(e.get("quantity"))).append("\n");
 
         }
+
+
+        //footer
+        text.append("[C]=================================\n");
+        text.append("[R]Total: ").append(total).append("\n");
+
+        return printer.setTextToPrint(text.toString());
     }
+
+
 }

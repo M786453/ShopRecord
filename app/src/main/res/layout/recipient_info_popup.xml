@@ -31,9 +31,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 "
                 android:ems="10"
+
                 android:hint="Enter Recipient Name"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:maxLength="30" />
 
 
 

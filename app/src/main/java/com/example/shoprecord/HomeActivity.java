@@ -27,13 +27,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-        //checking for bluetooth permission
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED){
-
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.BLUETOOTH},1000);
-
-        }
-
         shopViewModel = new ViewModelProvider(this).get(ShopViewModel.class);
 
         shopViewModel.getmAllStoreItems().observe(this, storeItems -> {
