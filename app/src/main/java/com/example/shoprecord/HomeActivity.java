@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
@@ -27,7 +26,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
     private ShopViewModel shopViewModel;
-
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
@@ -80,6 +78,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+
         findViewById(R.id.btnBilling).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -100,44 +99,8 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
 
 
-                if (ActivityCompat.checkSelfPermission(HomeActivity.this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                startActivity(new Intent(HomeActivity.this,BackupActivity.class));
 
-                    try{
-
-                    ProgressDialog progressDialog = new ProgressDialog(HomeActivity.this);
-                    progressDialog.setTitle("BACKUP OF SHOP RECORD");
-                    progressDialog.setMessage("Doing Backup...");
-                    progressDialog.show();
-
-                    WriteDataToFile.createDatabaseDirectory();
-
-                    Date dateObj = new Date();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                    String date = simpleDateFormat.format(dateObj);
-
-                    WriteDataToFile.createSpecificBackupDirectory(date);
-
-                    WriteDataToFile.writeStoreData(Data.store_items_hm, Data.store_items_list, date + "/store.txt");
-
-
-                    WriteDataToFile.writeRecipientData(getRecipientsTableData(), date + "/recipients.txt");
-
-
-                    WriteDataToFile.writeBillsData(getBillsTableData(), date + "/bills.txt");
-
-
-                    progressDialog.dismiss();
-
-                    FancyToast.makeText(HomeActivity.this, "Backup Done", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
-                }catch(Exception e){
-                        e.printStackTrace();
-                }
-                }else{
-
-                    ActivityCompat.requestPermissions(HomeActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},9999);
-
-                }
 
             }
         });
@@ -162,62 +125,5 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
-    private ArrayList<HashMap<String,String>> getRecipientsTableData(){
-
-        ArrayList<HashMap<String,String>> recipient_table = new ArrayList<>();
-
-        shopViewModel.getmAllRecipient().observe(this,recipients -> {
-
-            recipient_table.clear();
-
-
-            for (Recipient e: recipients){
-
-                HashMap<String,String> recipient = new HashMap<>();
-                recipient.put("id",e.id+"");
-                recipient.put("name",e.getName());
-                recipient.put("total",e.getTotal());
-                recipient.put("key",e.getKey());
-                recipient.put("date",e.getDate());
-
-
-                recipient_table.add(recipient);
-
-            }
-
-
-        });
-
-        return recipient_table;
-    }
-
-
-    private ArrayList<HashMap<String,String>> getBillsTableData(){
-
-
-        ArrayList<HashMap<String,String>> billsTableData = new ArrayList<>();
-
-        shopViewModel.getAllAlphabetizeBills().observe(this,bills -> {
-
-            billsTableData.clear();
-
-            for (Bills bill: bills){
-
-                HashMap<String,String> b = new HashMap<>();
-                b.put("id",bill.id + "");
-                b.put("name",bill.getName());
-                b.put("quantity",bill.getQuantity());
-                b.put("price",bill.getPrice());
-                b.put("key",bill.getKey());
-
-                billsTableData.add(b);
-            }
-
-
-        });
-
-
-        return billsTableData;
-    }
 
 }

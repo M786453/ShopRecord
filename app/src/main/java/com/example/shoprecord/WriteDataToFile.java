@@ -81,6 +81,8 @@ public class WriteDataToFile {
 
         try{
 
+            Log.i("wRecipient",recipient_list.toString());
+
             JSONObject recipient_table = new JSONObject();
 
             JSONArray jsonArray = new JSONArray();
@@ -120,6 +122,8 @@ public class WriteDataToFile {
 
 
         try{
+
+            Log.i("wBills",bills_list.toString());
 
             JSONObject bills_table = new JSONObject();
             JSONArray jsonArray =  new JSONArray();
