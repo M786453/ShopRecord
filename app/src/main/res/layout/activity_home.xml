@@ -59,6 +59,19 @@
             android:textSize="16sp"
             android:textStyle="bold"
             app:backgroundTint="#2196F3" />
+
+        <Button
+            android:id="@+id/btnBackup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="20dp"
+            android:background="@drawable/rounded_shape"
+            android:fontFamily="sans-serif-medium"
+            android:text="BACKUP"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#2196F3" />
     </LinearLayout>
 
 </LinearLayout>

@@ -15,7 +15,7 @@ public class ShopRepository {
 
     private LiveData<List<Recipient>> mAllRecipients;
 
-
+    private LiveData<List<Bills>> mAllBills;
 
     ShopRepository(Application application){
 
@@ -24,6 +24,8 @@ public class ShopRepository {
         mAllItems = shopDao.getAlphabetizedWords();
 
         mAllRecipients = shopDao.getAlphabetizeRecipients();
+
+        mAllBills = shopDao.getAllAlphabetizeBills();
 
 
     }
@@ -120,6 +122,13 @@ public class ShopRepository {
 
 
     //bill functions
+
+
+    LiveData<List<Bills>> getAllAlphabetizeBills(){
+
+        return mAllBills;
+
+    }
 
     LiveData<List<Bills>> getmAllBills(String key){
 

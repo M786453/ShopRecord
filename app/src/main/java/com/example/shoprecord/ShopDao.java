@@ -62,6 +62,9 @@ public interface ShopDao {
     @Query("SELECT * FROM bills_table WHERE bill_key= :bill_key ORDER BY item_name ASC")
     LiveData<List<Bills>> getAlphabetizeBill(String bill_key);
 
+    @Query("SELECT * FROM bills_table ORDER BY item_name ASC")
+    LiveData<List<Bills>> getAllAlphabetizeBills();
+
     @Query("DELETE FROM bills_table WHERE bill_id= :bill_id")
     void deleteBill(int bill_id);
 

@@ -685,7 +685,7 @@ public class SingleBillActivity extends AppCompatActivity {
         //header
 
         StringBuilder text =
-                new StringBuilder("[L]\n" +
+                new StringBuilder(
                         "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
                         "[C]<b>Ph# 03427870419</b>\n" +
                         "[L]" + recipient_name + "[R]" + date + "\n" +

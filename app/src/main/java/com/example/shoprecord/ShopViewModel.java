@@ -17,12 +17,15 @@ public class ShopViewModel extends AndroidViewModel {
 
     private final LiveData<List<Recipient>> mAllRecipient;
 
+    private final LiveData<List<Bills>> mAllBills;
+
     public ShopViewModel(Application application){
         super(application);
         shopRepository = new ShopRepository(application);
         mAllStoreItems = shopRepository.getmAllItems();
 
         mAllRecipient = shopRepository.getmAllRecipients();
+        mAllBills = shopRepository.getAllAlphabetizeBills();
 
     }
 
@@ -51,6 +54,11 @@ public class ShopViewModel extends AndroidViewModel {
     }
 
     //bill functions
+
+    LiveData<List<Bills>> getAllAlphabetizeBills(){
+
+        return mAllBills;
+    }
 
     LiveData<List<Bills>> getmAllBills(String key){
 

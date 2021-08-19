@@ -11,7 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {StoreItem.class,Bills.class,Recipient.class}, version = 1, exportSchema = false)
+@Database(entities = {StoreItem.class,Bills.class,Recipient.class}, version = 1)
 public abstract class ShopRoomDatabase extends RoomDatabase {
 
 
