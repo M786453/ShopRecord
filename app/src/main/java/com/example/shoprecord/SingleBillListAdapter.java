@@ -54,7 +54,8 @@ public class SingleBillListAdapter extends BaseAdapter {
         txtItemPrice.setText(bill_items_list.get(i).get("price"));
         txtItemQuantity.setText(bill_items_list.get(i).get("quantity"));
 
-        int total = Integer.parseInt(bill_items_list.get(i).get("price")) * Integer.parseInt(bill_items_list.get(i).get("quantity"));
+        long total = Long.parseLong(bill_items_list.get(i).get("price")) * Long.parseLong(bill_items_list.get(i).get("quantity"));
+
 
         txtItemTotal.setText(total+"");
 

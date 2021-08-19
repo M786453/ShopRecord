@@ -65,7 +65,7 @@ public class SingleBillActivity extends AppCompatActivity {
     private String date="";
     private int pos;
     private String key;
-    private int total;
+    private long total;
     private ShopViewModel shopViewModel;
     private ArrayList<String> item_name_list;
     private TextView txtTotal,txtBillNo;
@@ -167,7 +167,7 @@ public class SingleBillActivity extends AppCompatActivity {
         shopViewModel.getmAllBills(key).observe(this,bills -> {
             item_name_list.clear();
             bill_items_list.clear();
-            int total = 0;
+            long total = 0;
             for (Bills e: bills){
 
                 HashMap<String,String> bill_info = new HashMap<>();
@@ -180,7 +180,8 @@ public class SingleBillActivity extends AppCompatActivity {
                 bill_items_list.add(bill_info);
                 item_name_list.add(e.getName());
 
-                total += Integer.parseInt(e.getQuantity())*Integer.parseInt(e.getPrice());
+                total += Long.parseLong(e.getQuantity()) * Long.parseLong(e.getPrice());
+
             }
 
             txtTotal.setText("TOTAL: "+total+"");
@@ -270,10 +271,10 @@ public class SingleBillActivity extends AppCompatActivity {
 
 
                                 //item's info from store
-                                int available_quantity = Integer.parseInt(Data.store_items_hm.get(in_item_name).get("quantity"));
-                                int price = Integer.parseInt(Data.store_items_hm.get(in_item_name).get("price"));
+                                long available_quantity = Long.parseLong(Data.store_items_hm.get(in_item_name).get("quantity"));
+                                long price = Long.parseLong(Data.store_items_hm.get(in_item_name).get("price"));
 
-                                if (available_quantity < Integer.parseInt(in_item_quantity)){
+                                if (available_quantity < Long.parseLong(in_item_quantity)){
 
                                     FancyToast.makeText(SingleBillActivity.this, "Only "+available_quantity +" Items Available In Store!", FancyToast.LENGTH_LONG, FancyToast.INFO, false).show();
                                     return;
@@ -289,8 +290,10 @@ public class SingleBillActivity extends AppCompatActivity {
 
 
                                     //updating store table
-                                    shopViewModel.updateStoreItem((available_quantity - Integer.parseInt(in_item_quantity))+"",in_item_name);
-                                    Data.store_items_hm.get(in_item_name).put("quantity",(available_quantity - Integer.parseInt(in_item_quantity))+"");
+                                    long quan = (available_quantity - Long.parseLong(in_item_quantity));
+
+                                    shopViewModel.updateStoreItem(quan+"",in_item_name);
+                                    Data.store_items_hm.get(in_item_name).put("quantity",quan+"");
 
 
                                 }catch (Exception e){
@@ -363,7 +366,7 @@ public class SingleBillActivity extends AppCompatActivity {
                 TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDelete);
 
                 String item_name = bill_items_list.get(i).get("name");
-                int quantity = Integer.parseInt(bill_items_list.get(i).get("quantity"));
+                long quantity = Long.parseLong(bill_items_list.get(i).get("quantity"));
 
                 txtDeleteStatement.setText("Are You Sure To Delete The Item \""+item_name+"\"?");
 
@@ -381,16 +384,20 @@ public class SingleBillActivity extends AppCompatActivity {
                         if (!Data.store_items_list.contains(item_name))
                             canModifyStore = false;
 
-                        int available_quantity=0;
+                        long available_quantity=0;
                         if (canModifyStore)
-                        available_quantity = Integer.parseInt(Data.store_items_hm.get(item_name).get("quantity"));
+                        available_quantity = Long.parseLong(Data.store_items_hm.get(item_name).get("quantity"));
 
 
                         try{
 
                                 if (canModifyStore) {
-                                    shopViewModel.updateStoreItem((available_quantity + quantity) + "", item_name);
-                                    Data.store_items_hm.get(item_name).put("quantity", (available_quantity + quantity) + "");
+
+                                    long resQuan = (available_quantity + quantity);
+
+                                    shopViewModel.updateStoreItem( resQuan+"", item_name);
+                                    Data.store_items_hm.get(item_name).put("quantity", resQuan+"");
+
                                 }
 
                                 shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
@@ -483,16 +490,16 @@ public class SingleBillActivity extends AppCompatActivity {
                         }
 
 
-                        int in_quantity = Integer.parseInt(in_item_quantity);
-                        int prev_quantity = Integer.parseInt(bill_items_list.get(i).get("quantity"));
-                        int store_item_quantity = Integer.parseInt(Data.store_items_hm.get(in_item_name).get("quantity"));
+                        long in_quantity = Long.parseLong(in_item_quantity);
+                        long prev_quantity = Long.parseLong(bill_items_list.get(i).get("quantity"));
+                        long store_item_quantity = Long.parseLong(Data.store_items_hm.get(in_item_name).get("quantity"));
 
                         try{
                         if (in_quantity > prev_quantity) {
 
                             //if more than prev then minus from store
 
-                            int quantity = in_quantity - prev_quantity;
+                            long quantity = in_quantity - prev_quantity;
 
 
                             if (store_item_quantity < quantity) {
@@ -501,16 +508,22 @@ public class SingleBillActivity extends AppCompatActivity {
                                 return;
                             }
 
-                            shopViewModel.updateStoreItem((store_item_quantity - quantity) + "", in_item_name);
-                            Data.store_items_hm.get(in_item_name).put("quantity",(store_item_quantity - quantity) + "");
+                            long resQuan = (store_item_quantity - quantity);
+
+
+                            shopViewModel.updateStoreItem( resQuan+"", in_item_name);
+                            Data.store_items_hm.get(in_item_name).put("quantity",resQuan+"");
 
                         } else if (in_quantity < prev_quantity) {
 
                             //if less than prev then add in store
-                            int quantity = prev_quantity - in_quantity;
+                            long quantity = prev_quantity - in_quantity;
 
-                            shopViewModel.updateStoreItem((store_item_quantity + quantity) + "", in_item_name);
-                            Data.store_items_hm.get(in_item_name).put("quantity",(store_item_quantity + quantity) + "");
+                            long resQuan = (store_item_quantity + quantity);
+
+
+                            shopViewModel.updateStoreItem( resQuan+"", in_item_name);
+                            Data.store_items_hm.get(in_item_name).put("quantity",resQuan+"");
                         }
 
 
@@ -581,88 +594,14 @@ public class SingleBillActivity extends AppCompatActivity {
 
     }
 
-    private void printText() {
 
-        try {
-               BluetoothPrintersConnections bluetoothPrintersConnections = new BluetoothPrintersConnections();
-
-            if (bluetoothPrintersConnections.getList().length>0){
-
-                if (BluetoothPrintersConnections.selectFirstPaired().isConnected()){
-
-                    EscPosPrinter printer = new EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32);
-
-                    int total = calculateTotal();
-
-                    //header
-
-                    String text =
-                            "[L]\n"+
-                                    "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
-                                    "[C]<b>Ph# 03427870419</b>\n" +
-                                    "[L]"+recipient_name+"[R]"+date+"\n" +
-                                    "[C]===============================================\n" +
-                                    "[L]<b>Item Name</b>[C]<b>Qty</b>[C]<b>Price</b>[R]<b>Total</b>\n"+
-                                    "[C]===============================================\n";
-
-                    //body
-                    for (HashMap<String,String> e:bill_items_list){
-
-                        text += "[L]"+e.get("name")+"[C]"+e.get("quantity")+"[C]"+e.get("price")+"[R]"+(Integer.parseInt(e.get("price"))*Integer.parseInt(e.get("quantity")))+"\n";
-
-                    }
-
-
-                    //footer
-                    text += "[R]"+total+"\n";
-                    printer.printFormattedText(text);
-
-                    FancyToast.makeText(this,"Printing",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
-
-
-
-                }else{
-
-
-                    new AlertDialog.Builder(this)
-                            .setTitle("Printer")
-                            .setMessage("Printer Not Connected To Device")
-                            .setNegativeButton(android.R.string.no,null)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
-
-                }
-
-
-
-            }else{
-
-                new AlertDialog.Builder(this)
-                        .setTitle("Printer")
-                        .setMessage("Printer Not Found")
-                        .setNegativeButton(android.R.string.no,null)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-
-
-            }
-
-
-
-        }catch (Exception e){
-            if (e !=null)
-            Log.i("Printer_Error",e.getMessage());
-
-        }
-    }
-
-    private int calculateTotal() {
+    private long calculateTotal() {
 
         //finding total
-        int total = 0;
+        long total = 0;
         for (HashMap<String,String> e: bill_items_list){
 
-            total += Integer.parseInt(e.get("price")) * Integer.parseInt(e.get("quantity"));
+            total += Long.parseLong(e.get("price")) * Long.parseLong(e.get("quantity"));
 
         }
 
@@ -741,7 +680,7 @@ public class SingleBillActivity extends AppCompatActivity {
 
         AsyncEscPosPrinter printer = new AsyncEscPosPrinter(printerConnection, 203, 48f, 32);
 
-        int total = calculateTotal();
+        long total = calculateTotal();
 
         //header
 
@@ -750,21 +689,27 @@ public class SingleBillActivity extends AppCompatActivity {
                         "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
                         "[C]<b>Ph# 03427870419</b>\n" +
                         "[L]" + recipient_name + "[R]" + date + "\n" +
-                        "[C]=================================\n" +
-                        "[L]Item Name[C]Qty[C]Price[R]Total\n" +
-                        "[C]=================================\n");
+                        "[C]==================================\n" +
+                        "[L]Item Name[C]Qty[R]Total\n" +
+                        "[C]==================================\n");
 
         //body
         for (HashMap<String,String> e:bill_items_list){
 
-            text.append("[L]").append(e.get("name")).append("[C]").append(e.get("quantity")).append("[C]").append(e.get("price")).append("[R]").append(Integer.parseInt(e.get("price")) * Integer.parseInt(e.get("quantity"))).append("\n");
+
+            long totalItem =  Long.parseLong(e.get("price")) * Long.parseLong(e.get("quantity"));
+            String totalStr = totalItem+"";
+            String quantity = Long.parseLong(e.get("quantity")) + "";
+
+            text.append("[L]").append(e.get("name")).append("[C]").append(quantity).append("[R]").append(totalStr).append("\n");
 
         }
 
 
         //footer
-        text.append("[C]=================================\n");
-        text.append("[R]Total: ").append(total).append("\n");
+        text.append("[C]==================================\n");
+        String str = total+"";
+        text.append("[R]Total: ").append(str).append("\n");
 
         return printer.setTextToPrint(text.toString());
     }

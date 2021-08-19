@@ -344,8 +344,8 @@ public class BillingActivity extends AppCompatActivity {
                                             if (Data.store_items_list.contains(e.getName())) {
 
 
-                                                int store_item_qty = Integer.parseInt(Data.store_items_hm.get(e.getName()).get("quantity"));
-                                                int bill_item_qty = Integer.parseInt(e.getQuantity());
+                                                long store_item_qty = Long.parseLong(Data.store_items_hm.get(e.getName()).get("quantity"));
+                                                long bill_item_qty = Long.parseLong(e.getQuantity());
 
                                                 shopViewModel.updateStoreItem((store_item_qty + bill_item_qty) + "", e.getName());
                                                 Data.store_items_hm.get(e.getName()).put("quantity", (store_item_qty + bill_item_qty) + "");
