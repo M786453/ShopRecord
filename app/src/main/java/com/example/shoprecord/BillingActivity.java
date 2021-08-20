@@ -30,6 +30,7 @@ import com.shashank.sony.fancytoastlib.FancyToast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.StringTokenizer;
 
 public class BillingActivity extends AppCompatActivity {
 
@@ -46,6 +47,7 @@ public class BillingActivity extends AppCompatActivity {
     private ImageView imgSearchRecipient;
     private ArrayAdapter<String> bill_name_adapter;
     private ArrayList<String> bill_name_list;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +66,7 @@ public class BillingActivity extends AppCompatActivity {
         imgSearchRecipient = findViewById(R.id.imgSearchRecipient);
         bill_name_list = new ArrayList<>();
 
+
         isShowingPopup = false;
         billsListAdapter = new BillsListAdapter(BillingActivity.this);
         bill_name_adapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, bill_name_list);
@@ -79,6 +82,7 @@ public class BillingActivity extends AppCompatActivity {
 
         Data.bills_list.clear();
         bill_name_list.clear();
+        Data.billDateList.clear();
 
         for (Recipient e: recipients){
 
@@ -95,6 +99,19 @@ public class BillingActivity extends AppCompatActivity {
 //            if (!bill_name_list.contains(e.getName()))
             bill_name_list.add(e.getName());
 
+
+
+            StringTokenizer stringTokenizer = new StringTokenizer(e.getDate()," ");
+            String date = stringTokenizer.nextToken();
+            if (!Data.billDateList.contains(date)) {
+
+                Data.billDateList.add(date);
+
+            }else{
+
+                Data.billDateList.add("");
+
+            }
 
         }
 
@@ -328,6 +345,13 @@ public class BillingActivity extends AppCompatActivity {
                         String key = Data.bills_list.get(i).get("key");
 
                         try {
+
+                            if(radioGroup.getCheckedRadioButtonId() == -1){
+
+                                FancyToast.makeText(BillingActivity.this,"Please Select Option",FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                                return;
+
+                            }
 
                             if (canModifyStore[0]){
 

@@ -7,15 +7,19 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class BillsListAdapter extends BaseAdapter {
 
     private Context context;
     private LayoutInflater layoutInflater;
 
+
     BillsListAdapter(Context context){
 
         this.context = context;
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 
     }
 
@@ -43,6 +47,15 @@ public class BillsListAdapter extends BaseAdapter {
         TextView txtBillDate = view.findViewById(R.id.txt_bill_date);
         TextView txtBillTotal = view.findViewById(R.id.txt_bill_total);
         TextView txtBillNo = view.findViewById(R.id.txtBillNo);
+        TextView txtDateBill = view.findViewById(R.id.txtDateBill);
+
+
+        if (!Data.billDateList.get(i).equals("")){
+
+            txtDateBill.setText(Data.billDateList.get(i));
+            txtDateBill.setVisibility(View.VISIBLE);
+
+        }
 
         //setting values
         txtRecipientName.setText(Data.bills_list.get(i).get("name"));

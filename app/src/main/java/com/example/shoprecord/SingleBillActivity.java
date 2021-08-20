@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.dantsu.escposprinter.EscPosPrinter;
@@ -360,15 +361,40 @@ public class SingleBillActivity extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                View popupView = layoutInflater.inflate(R.layout.delete_item_popup,null);
-                TextView txtDeleteStatement = popupView.findViewById(R.id.txtDeleteStatement);
-                TextView txtDelete = popupView.findViewById(R.id.txtDeleteItem);
-                TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDelete);
+                View popupView = layoutInflater.inflate(R.layout.delete_bill_popup,null);
+                TextView txtPopUpStatement = popupView.findViewById(R.id.txtPopupStatementBill);
+                TextView txtDeleteStatement = popupView.findViewById(R.id.txtDeleteStatementBill);
+                TextView txtDelete = popupView.findViewById(R.id.txtDeleteBill);
+                TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDeleteBill);
+                RadioGroup radioGroup = popupView.findViewById(R.id.radio_group);
+                boolean[] canModifyStore = new boolean[1];
+
+
+                txtPopUpStatement.setText("DELETE ITEM");
+
+                radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+
+                        switch (i){
+
+                            case R.id.rbtnYes:
+                                canModifyStore[0] = true;
+                                break;
+                            case R.id.rbtnNo:
+                                canModifyStore[0] = false;
+                                break;
+
+                        }
+
+
+                    }
+                });
 
                 String item_name = bill_items_list.get(i).get("name");
                 long quantity = Long.parseLong(bill_items_list.get(i).get("quantity"));
 
-                txtDeleteStatement.setText("Are You Sure To Delete The Item \""+item_name+"\"?");
+                txtDeleteStatement.setText("Delete The Item \""+item_name+"\"?\nMake Changes To Store?");
 
                 PopupWindow popupWindow = new PopupWindow(popupView,LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                 popupWindow.setFocusable(true);
@@ -379,29 +405,29 @@ public class SingleBillActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
-                        boolean canModifyStore=true;
-
-                        if (!Data.store_items_list.contains(item_name))
-                            canModifyStore = false;
-
-                        long available_quantity=0;
-                        if (canModifyStore)
-                        available_quantity = Long.parseLong(Data.store_items_hm.get(item_name).get("quantity"));
-
-
                         try{
 
-                                if (canModifyStore) {
+                            if(radioGroup.getCheckedRadioButtonId() == -1){
 
-                                    long resQuan = (available_quantity + quantity);
+                                FancyToast.makeText(SingleBillActivity.this,"Please Select Option",FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                                return;
 
-                                    shopViewModel.updateStoreItem( resQuan+"", item_name);
-                                    Data.store_items_hm.get(item_name).put("quantity", resQuan+"");
+                            }
 
-                                }
+                        if (canModifyStore[0] && Data.store_items_list.contains(item_name)){
 
-                                shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
 
+                                long available_quantity = Long.parseLong(Data.store_items_hm.get(item_name).get("quantity"));
+                                long resQuan = (available_quantity + quantity);
+
+                                shopViewModel.updateStoreItem(resQuan + "", item_name);
+                                Data.store_items_hm.get(item_name).put("quantity", resQuan + "");
+
+                        }
+
+
+
+                            shopViewModel.deleteBill(Integer.parseInt(bill_items_list.get(i).get("id")));
 
                         }catch (Exception e){
 

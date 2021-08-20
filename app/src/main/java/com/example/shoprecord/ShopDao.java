@@ -39,7 +39,7 @@ public interface ShopDao {
     @Query("DELETE FROM recipient_table")
     void deleteAllRecipient();
 
-    @Query("SELECT * FROM recipient_table ORDER BY recipient_name ASC")
+    @Query("SELECT * FROM recipient_table")
     LiveData<List<Recipient>> getAlphabetizeRecipients();
 
     @Query("SELECT * FROM recipient_table WHERE bill_key= :key")
