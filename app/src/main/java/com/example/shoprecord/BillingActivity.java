@@ -118,6 +118,7 @@ public class BillingActivity extends AppCompatActivity {
             billsListAdapter.notifyDataSetChanged();
             bill_name_adapter.notifyDataSetChanged();
             autoCompleteTextView_Recipient.setAdapter(bill_name_adapter);
+            bill_recipient_listview.setSelectionFromTop(Data.bills_list.size()-1,0);
             if (Data.bills_list.size()>0){
 
                 bill_recipient_listview.setVisibility(View.VISIBLE);
