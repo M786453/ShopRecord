@@ -613,6 +613,121 @@ public class SingleBillActivity extends AppCompatActivity {
                 printUsb();
 
                 break;
+            case R.id.bill_delete:
+
+
+
+
+                View popupView = layoutInflater.inflate(R.layout.delete_bill_popup,null);
+
+                TextView txtDelete = popupView.findViewById(R.id.txtDeleteBill);
+                TextView txtCancelDelete = popupView.findViewById(R.id.txtCancelDeleteBill);
+                RadioGroup radioGroup = popupView.findViewById(R.id.radio_group);
+                boolean[] canModifyStore = new boolean[1];
+
+                radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup radioGroup, int i) {
+
+                        switch (i){
+
+                            case R.id.rbtnYes:
+                                canModifyStore[0] = true;
+                                break;
+                            case R.id.rbtnNo:
+                                canModifyStore[0] = false;
+                                break;
+
+                        }
+
+
+                    }
+                });
+
+
+                PopupWindow popupWindow = new PopupWindow(popupView,LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+                popupWindow.setFocusable(true);
+                popupWindow.showAtLocation(linearLayoutSingleBillParent,Gravity.CENTER,0,0);
+
+
+                txtDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        try {
+
+                            if(radioGroup.getCheckedRadioButtonId() == -1){
+
+                                FancyToast.makeText(SingleBillActivity.this,"Please Select Option",FancyToast.LENGTH_SHORT,FancyToast.INFO,false).show();
+                                return;
+
+                            }
+
+                            Log.i("C1",canModifyStore[0]+"");
+
+                            if (canModifyStore[0]){
+
+                                    for (HashMap<String,String> e: bill_items_list){
+
+
+
+
+                                        if (Data.store_items_list.contains(e.get("name"))) {
+
+
+                                            long store_item_qty = Long.parseLong(Data.store_items_hm.get(e.get("name")).get("quantity"));
+                                            long bill_item_qty = Long.parseLong(e.get("quantity"));
+
+                                            shopViewModel.updateStoreItem((store_item_qty + bill_item_qty) + "", e.get("name"));
+                                            Data.store_items_hm.get(e.get("name")).put("quantity", (store_item_qty + bill_item_qty) + "");
+
+
+                                        }
+
+                                    }
+
+
+
+                            }
+
+                            shopViewModel.deleteAllBills(key);
+
+                            int id = Integer.parseInt(Data.bills_list.get(pos).get("id"));
+                            shopViewModel.deleteRecipient(id);
+
+                            finish();
+
+
+                        }catch (Exception e){
+
+                            Log.i("Error",e.getMessage());
+
+                        }
+
+
+                        popupWindow.setFocusable(false);
+                        popupWindow.dismiss();
+                        FancyToast.makeText(SingleBillActivity.this,"Deleted",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
+                    }
+                });
+
+
+                txtCancelDelete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        popupWindow.setFocusable(false);
+                        popupWindow.dismiss();
+                        FancyToast.makeText(SingleBillActivity.this,"Canceled",FancyToast.LENGTH_SHORT,FancyToast.SUCCESS,false).show();
+                    }
+                });
+
+
+
+
+
+
+                break;
 
         }
 
@@ -713,7 +828,8 @@ public class SingleBillActivity extends AppCompatActivity {
         StringBuilder text =
                 new StringBuilder(
                         "[C]<b>New Shehzad Auto's And Spare Parts</b>\n" +
-                        "[C]<b>Ph# 03427870419</b>\n" +
+                        "[C]<b>Ph#: 03427870419</b>\n" +
+                                "[C]<b>Ph#: 03407915418</b>\n" +
                         "[L]" + recipient_name + "[R]" + date + "\n" +
                         "[C]==================================\n" +
                         "[L]Item Name[C]Qty[R]Total\n" +

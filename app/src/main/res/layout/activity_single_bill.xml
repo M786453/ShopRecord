@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Ph#: 03427870419" />
+            android:text="Ph#: 03427870419\nPh#: 03407915418" />
 
         <TextView
             android:id="@+id/bill_no"
